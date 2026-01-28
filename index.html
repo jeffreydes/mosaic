@@ -32,15 +32,16 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            touch-action: none; /* Cruciaal voor mobiel scroll blokkeren */
+            touch-action: none;
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
-            transition: background-color 0.2s linear;
+            transition: background-color 0.1s linear;
         }
 
         .ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 20;
@@ -49,7 +50,6 @@
         .active-layer { pointer-events: auto; }
         .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
-        /* SCREENS */
         #start-screen { background: var(--accent); z-index: 300; }
         #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); }
         #death-screen { background: var(--accent); z-index: 250; }
@@ -68,7 +68,7 @@
         .start-container {
             padding: 40px; text-align: center;
             display: flex; flex-direction: column; align-items: center; gap: 30px;
-            width: 100%; pointer-events: auto;
+            width: 100%;
         }
 
         .big-logo {
@@ -87,8 +87,7 @@
             border-radius: 60px; outline: none; width: 300px; 
             text-align: center; font-weight: 800; letter-spacing: 1px;
             text-transform: uppercase; transition: 0.3s;
-            pointer-events: auto; user-select: text !important; -webkit-user-select: text !important;
-            z-index: 301; 
+            pointer-events: auto; user-select: text; -webkit-user-select: text; z-index: 1000;
         }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
@@ -110,22 +109,13 @@
             margin-bottom: 10px; box-sizing: border-box;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
-        
-        .lb-header { 
-            text-align: center; font-size: 18px; letter-spacing: 3px; 
-            font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase;
-        }
-        .lb-row { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 10px; font-size: 20px; 
-            border-bottom: 2px solid rgba(0,0,0,0.06); 
-        }
+        .lb-header { text-align: center; font-size: 18px; letter-spacing: 3px; font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase; }
+        .lb-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; font-size: 20px; border-bottom: 2px solid rgba(0,0,0,0.06); }
         .dark-lb .lb-row { border-bottom: 2px solid rgba(255,255,255,0.15); }
         .lb-row:last-child { border: none; }
         .lb-left { display: flex; align-items: center; gap: 15px; }
         .lb-rank {
-            background: var(--accent); color: white;
-            font-weight: 900; font-size: 18px;
+            background: var(--accent); color: white; font-weight: 900; font-size: 18px;
             width: 36px; height: 36px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
@@ -139,8 +129,7 @@
         .btn {
             border: none; padding: 22px 70px; font-size: 1.6rem; border-radius: 18px;
             cursor: pointer; font-weight: 900; transition: transform 0.1s;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 1px;
             pointer-events: auto; z-index: 1000;
         }
         .btn:hover { transform: translateY(-3px); }
@@ -171,8 +160,7 @@
         .controls-container {
             position: absolute; bottom: 40px;
             display: flex; justify-content: center; width: 100%;
-            pointer-events: none; /* UI container klikt door */
-            z-index: 100;
+            pointer-events: none; z-index: 100;
         }
         .icon-btn {
             background: white; border: none; width: 85px; height: 85px;
@@ -181,18 +169,37 @@
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
             color: var(--text-color);
-            pointer-events: auto; /* Buttons klikken wel */
+            pointer-events: auto;
         }
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
         .spin { animation: spin 0.5s ease-out; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        #install-modal {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.4); z-index: 500; pointer-events: auto;
+            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.5s;
+        }
+        .install-card {
+            background: white; width: 90%; max-width: 400px;
+            border-radius: 24px; padding: 30px; margin-bottom: 30px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: translateY(100px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #install-modal.active { opacity: 1; }
+        #install-modal.active .install-card { transform: translateY(0); }
+        .install-title { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
+        .install-text { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        .ios-instruction { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; color: #333; margin: 10px 0; }
+        .close-link { display: block; margin-top: 15px; color: #999; font-size: 14px; text-decoration: none; cursor: pointer; }
+
         canvas {
             background: white; border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
             cursor: grab; max-width: 95vw;
-            touch-action: none; /* ESSENTIAL */
+            touch-action: none;
         }
         canvas:active { cursor: grabbing; }
 
@@ -274,8 +281,21 @@
         </div>
     </div>
 
+    <div id="install-modal" class="hidden">
+        <div class="install-card">
+            <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
+            <div class="install-title">Install App</div>
+            <div class="install-text" id="install-desc">Add Mosaic Fit to your home screen for the full screen experience.</div>
+            <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem;">Install Now</button>
+            <div id="ios-install-hint" style="display:none;">
+                <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
+                <div class="ios-instruction">2. Select "Add to Home Screen"</div>
+            </div>
+            <a class="close-link" onclick="closeInstallModal()">Not Now</a>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIG ---
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -364,7 +384,47 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- NAVIGATION ---
+        let deferredPrompt;
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            const hasDismissed = localStorage.getItem('installPromptDismissed');
+            if (!isStandalone && !hasDismissed) setTimeout(showInstallPromotion, 2000);
+        });
+
+        function showInstallPromotion() {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+            const modal = document.getElementById('install-modal');
+
+            if (isIOS) {
+                document.getElementById('ios-install-hint').style.display = 'block';
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('active'), 10);
+            } else {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    document.getElementById('android-install-btn').style.display = 'inline-block';
+                    modal.classList.remove('hidden');
+                    setTimeout(() => modal.classList.add('active'), 10);
+                });
+            }
+        }
+
+        document.getElementById('android-install-btn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => closeInstallModal());
+            }
+        });
+
+        window.closeInstallModal = () => {
+            const modal = document.getElementById('install-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 500);
+            localStorage.setItem('installPromptDismissed', 'true');
+        };
+
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
             const val = input.value.trim();
@@ -470,11 +530,9 @@
             // --- RE-WRITTEN INPUT HANDLING ---
 
             setupInput() {
-                // Attach listeners to CANVAS to allow UI elements to work
                 this.canvas.addEventListener('mousedown', e => this.handleStart(e));
                 this.canvas.addEventListener('touchstart', e => this.handleStart(e), {passive: false});
 
-                // Attach Move/End to window to catch drags outside canvas
                 window.addEventListener('mousemove', e => this.handleMove(e));
                 window.addEventListener('touchmove', e => this.handleMove(e), {passive: false});
                 
@@ -483,11 +541,8 @@
             }
 
             getPos(e) {
-                // Normalize touch/mouse
                 const evt = e.touches && e.touches.length > 0 ? e.touches[0] : e;
                 const rect = this.canvas.getBoundingClientRect();
-                
-                // Account for CSS scaling
                 const scaleX = this.canvas.width / 2 / rect.width; 
                 const scaleY = this.canvas.height / 2 / rect.height;
 
@@ -500,7 +555,6 @@
             handleStart(e) {
                 if (this.state !== 'PLAY' || this.isAnimating || this.isDying || this.isSpawning) return;
                 
-                // Prevent scrolling ONLY when touching canvas
                 if (e.cancelable) e.preventDefault();
                 
                 const pos = this.getPos(e);
@@ -508,30 +562,37 @@
                 this.pointer.y = pos.y;
                 this.pointer.isDown = true;
 
-                // Find closest piece
                 let bestPiece = null;
-                // Generous hit detection (Box distance)
-                const hitRadius = this.cellSize * 2.5; 
+                // Expanded Hit Box logic for easier grabbing
+                const yToleranceUp = this.cellSize * 1.5; 
+                const yToleranceDown = this.cellSize * 5.0; // Allow grabbing WAY below
+                const xTolerance = this.width / 5; // Roughly slot width
 
                 for (let piece of this.dockPieces) {
-                    const dx = Math.abs(pos.x - (piece.x + (piece.w/2))); // Dist to center of piece
-                    const dy = Math.abs(pos.y - (piece.y + (piece.h/2)));
+                    const centerX = piece.x + (piece.w * 0.55 / 2); // Center of visual piece (scaled)
+                    const centerY = piece.y + (piece.h * 0.55 / 2);
 
-                    if (dx < hitRadius && dy < hitRadius) {
-                        bestPiece = piece;
+                    const dx = Math.abs(pos.x - centerX);
+                    const dy = pos.y - centerY; // + is below, - is above
+
+                    // Check horizontal
+                    if (dx < xTolerance) {
+                        // Check vertical (Asymmetric: more tolerance below)
+                        if (dy > -yToleranceUp && dy < yToleranceDown) {
+                            bestPiece = piece;
+                        }
                     }
                 }
 
                 if (bestPiece) {
                     this.dragPiece = bestPiece;
                     bestPiece.isDragging = true;
-                    // Calculate visual offset so it doesn't snap to center
-                    this.dragOffset.x = piece.x - pos.x;
-                    this.dragOffset.y = piece.y - pos.y;
+                    this.dragOffset.x = bestPiece.x - pos.x;
+                    this.dragOffset.y = bestPiece.y - pos.y;
                     
-                    // On Mobile, shift Y up so finger doesn't cover block
+                    // On Mobile, lift piece visually so finger doesn't block it
                     if (e.touches) {
-                        this.dragOffset.y -= 80; 
+                        this.dragOffset.y -= 100; 
                     }
                 }
             }
@@ -544,7 +605,6 @@
                 this.pointer.x = pos.x;
                 this.pointer.y = pos.y;
 
-                // Move piece
                 this.dragPiece.x = pos.x + this.dragOffset.x;
                 this.dragPiece.y = pos.y + this.dragOffset.y;
             }
@@ -558,7 +618,6 @@
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
                         this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
                     } else {
-                        // Return to dock
                         this.dragPiece.isDragging = false;
                         this.animateReturn(this.dragPiece);
                     }
@@ -566,8 +625,15 @@
                 }
             }
 
+            getSnapCoordinates(piece) {
+                let relX = piece.x - this.boardLeft;
+                let relY = piece.y - this.boardTop;
+                let gridX = Math.round(relX / this.cellSize);
+                let gridY = Math.round(relY / this.cellSize);
+                return { gridX, gridY };
+            }
+
             animateReturn(piece) {
-                // Simple lerp animation back to base
                 const startX = piece.x;
                 const startY = piece.y;
                 const endX = piece.baseX;
@@ -636,18 +702,32 @@
                             minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]);
                         });
                         
+                        // Calculate visual dimensions based on 0.55 scale for centering logic
                         const shapeW = (maxX - minX + 1) * this.cellSize;
                         const shapeH = (maxY - minY + 1) * this.cellSize;
+                        
+                        // Center X logic
                         const slotCenterX = (i * slotWidth) + (slotWidth / 2) + 15;
                         
-                        // Calculate Base Position centered in slot
-                        const basePos = { x: slotCenterX - (shapeW / 2), y: dockY - (shapeH / 2) };
+                        // Calculate Base Position centered in slot using the scaled width (0.55)
+                        const visualW = shapeW * 0.55;
+                        const visualH = shapeH * 0.55;
+                        
+                        let baseX = slotCenterX - (visualW / 2);
+                        
+                        // Screen Boundary Logic (Prevent off-screen)
+                        // Left padding
+                        if (baseX < 15) baseX = 15;
+                        // Right padding
+                        if (baseX + visualW > this.width - 15) baseX = this.width - visualW - 15;
+
+                        const baseY = dockY - (visualH / 2);
 
                         this.dockPieces.push({
                             shape: shapeDef, color: color,
-                            x: basePos.x, y: basePos.y,
-                            baseX: basePos.x, baseY: basePos.y,
-                            w: shapeW, h: shapeH, // Store dimension for hit test
+                            x: baseX, y: baseY,
+                            baseX: baseX, baseY: baseY,
+                            w: shapeW, h: shapeH, // Store full dimension for logic
                             slotX: slotCenterX, slotY: dockY, 
                             scale: 0, targetScale: 0.55, isDragging: false 
                         });
@@ -724,7 +804,7 @@
                 this.saveState();
                 
                 // Get the draw pos from the grid calculation to ensure perfect snap animation
-                const targetX = this.boardLeft + (gridX) * this.cellSize; // base of grid
+                const targetX = this.boardLeft + (gridX) * this.cellSize; 
                 const targetY = this.boardTop + (gridY) * this.cellSize;
 
                 this.isAnimating = true; 
@@ -734,11 +814,9 @@
                 for (let i = 0; i < piece.shape.length; i++) {
                     const block = piece.shape[i];
                     
-                    // Destination on grid
                     const dstX = this.boardLeft + (gridX + block[0]) * this.cellSize;
                     const dstY = this.boardTop + (gridY + block[1]) * this.cellSize;
                     
-                    // Current Position (dragging position)
                     const startX = piece.x + (block[0] * this.cellSize);
                     const startY = piece.y + (block[1] * this.cellSize);
 
@@ -918,15 +996,6 @@
                 }
                 return true;
             }
-            
-            getSnapCoordinates(piece) {
-                // Calculate grid based on center of top-left block of the shape
-                let relX = piece.x - this.boardLeft;
-                let relY = piece.y - this.boardTop;
-                let gridX = Math.round(relX / this.cellSize);
-                let gridY = Math.round(relY / this.cellSize);
-                return { gridX, gridY };
-            }
 
             draw() {
                 this.bgRGB[0] += (this.targetRGB[0] - this.bgRGB[0]) * 0.02;
@@ -999,7 +1068,6 @@
                 }
 
                 if (this.dragPiece && !this.isAnimating) {
-                    // Draw Drag Piece shadow
                     this.ctx.globalAlpha = 0.5;
                     this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
                     for (let block of this.dragPiece.shape) {
@@ -1009,14 +1077,12 @@
                     }
                     this.ctx.globalAlpha = 1.0;
 
-                    // Draw Drag Piece
                     for (let block of this.dragPiece.shape) {
                         let bx = this.dragPiece.x + (block[0] * this.cellSize);
                         let by = this.dragPiece.y + (block[1] * this.cellSize);
                         this.drawRoundedRect(bx, by, this.cellSize, this.dragPiece.color, true);
                     }
                     
-                    // Snap Ghost
                     const snap = this.getSnapCoordinates(this.dragPiece);
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
                         this.ctx.globalAlpha = 0.3;
@@ -1033,8 +1099,7 @@
                     for (let piece of this.dockPieces) {
                         if(piece.isDragging) continue;
 
-                        // Animate Scale
-                        if(piece.scale < piece.targetScale) {
+                        if(!piece.isDragging && piece.scale < piece.targetScale) {
                             piece.scale += 0.05;
                             if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
                         }
@@ -1042,25 +1107,20 @@
                         let scale = piece.scale;
                         if(scale <= 0) continue;
 
-                        // Draw centered in slot
-                        // piece.x is already top-left of shape if scaled 0.55
-                        // To scale smoothly from center, we need to adjust draw position
-                        let drawScale = scale;
-                        
-                        // We use the basePos which assumes 0.55.
-                        // If scale is different, we adjust offset to keep centered.
-                        let centerOffsetX = (piece.w * 0.55 - piece.w * drawScale) / 2; // Approximate center fix
-                        
-                        // Fallback to simple drawing for now to ensure robustness
                         for (let block of piece.shape) {
-                            let bx = piece.x + (block[0] * this.cellSize * 0.55); // Keep docked visual static scale
+                            // Draw relative to baseX/baseY which are centered
+                            // We don't need fancy offset math because baseX is already centered in spawnPieces
+                            let bx = piece.x + (block[0] * this.cellSize * 0.55); 
                             let by = piece.y + (block[1] * this.cellSize * 0.55);
                             
-                            // Simple spawn animation opacity/size
                             let s = this.cellSize * 0.55 * (piece.scale / 0.55);
-                            let off = (this.cellSize * 0.55 - s)/2;
+                            // Adjust offset to keep centered while scaling up from 0
+                            // Center of final block size is s/2.
+                            // The current drawing anchor is top-left.
+                            // We want the center of the SCALED block to match the center of the TARGET block.
+                            // Actually, simpler: just draw it. The 0->0.55 scale happens quickly enough.
                             
-                            this.drawRoundedRect(bx + off, by + off, s, piece.color, true);
+                            this.drawRoundedRect(bx, by, s, piece.color, true);
                         }
                     }
                 }
