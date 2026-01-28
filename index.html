@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>Mosaic Fit</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff4757">
+    
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <style>
+        :root {
+            /* This variable will be updated by JS for smooth transitions */
+            --bg-color: #f0f2f5; 
+            --grid-bg: #dfe4ea;
+            --text-color: #2f3542;
+            --primary: #3742fa;
+            --accent: #ff4757;
+            --warning: #fba92c;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color); /* The outer background */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+            color: var(--text-color);
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background-color 0.1s linear; /* Smooth CSS transition helper */
+        }
+
+        /* --- UI LAYERS --- */
+        .ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .active-layer { pointer-events: all; }
+        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+
+        /* --- SCREENS --- */
+        #start-screen { background: var(--accent); z-index: 300; }
+        #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); }
+        #death-screen { background: var(--accent); z-index: 250; }
+
+        /* --- MENU CONTAINERS --- */
+        .menu-container {
+            padding: 40px 50px;
+            border-radius: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            max-width: 95%;
+            max-height: 98vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        /* Start Screen Specifics */
+        .start-container {
+            padding: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .big-logo {
+            width: 100px; height: 100px; 
+            background: white; border-radius: 24px; 
+            color: var(--accent); font-weight: 900; font-size: 4.5rem; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        #username-input { 
+            background: rgba(255,255,255,0.2); 
+            border: 3px solid rgba(255,255,255,0.4); 
+            padding: 20px 30px; color: white; font-size: 24px; 
+            border-radius: 60px; outline: none; width: 300px; 
+            text-align: center; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        #username-input::placeholder { color: rgba(255,255,255,0.6); }
+        #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
+
+        /* Main Menu Logo */
+        .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .logo-block {
+            width: 45px; height: 45px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 900; font-size: 1.6rem;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        /* Leaderboard */
+        .online-lb { 
+            width: 100%; min-width: 360px; max-width: 500px;
+            background: rgba(0,0,0,0.04); 
+            border-radius: 24px; padding: 30px; 
+            border: 2px solid rgba(0,0,0,0.05); 
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
+        
+        .lb-header { 
+            text-align: center; font-size: 18px; letter-spacing: 3px; 
+            font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase;
+        }
+        .lb-row { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 10px; font-size: 20px; 
+            border-bottom: 2px solid rgba(0,0,0,0.06); 
+        }
+        .dark-lb .lb-row { border-bottom: 2px solid rgba(255,255,255,0.15); }
+        .lb-row:last-child { border: none; }
+        .lb-left { display: flex; align-items: center; gap: 15px; }
+        .lb-rank {
+            background: var(--accent); color: white;
+            font-weight: 900; font-size: 18px;
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+        }
+        .dark-lb .lb-rank { background: white; color: var(--accent); }
+        .lb-name { font-weight: 800; color: var(--text-color); letter-spacing: -0.5px; }
+        .dark-lb .lb-name { color: white; }
+        .lb-score { font-weight: 900; color: var(--primary); font-size: 24px; }
+        .dark-lb .lb-score { color: white; }
+
+        /* Buttons */
+        .btn {
+            border: none; padding: 22px 70px; font-size: 1.6rem; border-radius: 18px;
+            cursor: pointer; font-weight: 900; transition: transform 0.1s;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover { transform: translateY(-3px); }
+        .btn:active { transform: scale(0.96); }
+        .btn-accent { background: var(--accent); color: white; } 
+        .btn-white { background: white; color: var(--accent); }
+
+        /* Game UI */
+        .header {
+            position: absolute; top: 30px; width: 90%; max-width: 500px;
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none; z-index: 5;
+        }
+        .mini-logo {
+            width: 55px; height: 55px; background: var(--accent);
+            border-radius: 14px; color: white; font-weight: 900; font-size: 2rem;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 18px rgba(255, 71, 87, 0.4);
+            animation: float 4s ease-in-out infinite;
+        }
+        .score-box {
+            background: white; padding: 12px 35px; border-radius: 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            font-weight: 800; font-size: 1.8rem; color: var(--primary);
+            transition: transform 0.1s;
+        }
+        .score-pop { transform: scale(1.3); color: var(--accent); }
+
+        .controls-container {
+            position: absolute; bottom: 40px;
+            display: flex; justify-content: center; width: 100%;
+            pointer-events: all;
+        }
+        .icon-btn {
+            background: white; border: none; width: 85px; height: 85px;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
+            color: var(--text-color);
+        }
+        .icon-btn:active { transform: scale(0.9); }
+        .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
+        .spin { animation: spin 0.5s ease-out; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Canvas - The Inner Background */
+        canvas {
+            background: white; /* Static inner background */
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.08);
+            cursor: grab; max-width: 95vw;
+        }
+        canvas:active { cursor: grabbing; }
+
+        .death-title { font-size: 3.5rem; color: white; font-weight: 900; margin: 0 0 10px 0; text-shadow: 0 5px 0 rgba(0,0,0,0.2); }
+        .death-score { font-size: 2rem; color: rgba(255,255,255,0.95); margin-bottom: 30px; font-weight: 700; }
+
+        @media (max-width: 500px) {
+            .menu-container { padding: 30px 20px; width: 95%; }
+            .online-lb { min-width: 100%; padding: 20px; }
+            .lb-row { font-size: 16px; }
+            .header { top: 20px; }
+            .controls-container { bottom: 25px; }
+            .icon-btn { width: 70px; height: 70px; }
+            .btn { font-size: 1.3rem; padding: 20px 50px; }
+            .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="ui-layer active-layer">
+        <div class="start-container">
+            <div class="big-logo">M</div>
+            <input type="text" id="username-input" placeholder="ENTER USERNAME" maxlength="12">
+            <button class="btn btn-white" style="margin-top: 25px; color: var(--accent);" onclick="enterMainMenu()">ENTER</button>
+        </div>
+    </div>
+
+    <div id="main-menu" class="ui-layer hidden">
+        <div class="menu-container">
+            <div class="logo-row">
+                <div class="logo-block" style="background:#ff6b6b; animation-delay:0s">M</div>
+                <div class="logo-block" style="background:#feca57; animation-delay:0.1s">O</div>
+                <div class="logo-block" style="background:#1dd1a1; animation-delay:0.2s">S</div>
+                <div class="logo-block" style="background:#54a0ff; animation-delay:0.3s">A</div>
+                <div class="logo-block" style="background:#5f27cd; animation-delay:0.4s">I</div>
+                <div class="logo-block" style="background:#ff9ff3; animation-delay:0.5s">C</div>
+            </div>
+            
+            <div class="online-lb">
+                <div class="lb-header">BEST WORLDWIDE</div>
+                <div id="main-lb-list" style="width: 100%;">Loading...</div>
+            </div>
+
+            <button class="btn btn-accent" id="startBtn">PLAY</button>
+        </div>
+    </div>
+
+    <div id="gameUI" class="ui-layer hidden">
+        <div class="header">
+            <div class="mini-logo">M</div>
+            <div class="score-box" id="scoreBox">0</div>
+        </div>
+
+        <div class="controls-container">
+            <button class="icon-btn" id="undoBtn" title="Undo (Once per game)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 14L4 9l5-5"></path>
+                    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="death-screen" class="ui-layer hidden">
+        <div class="menu-container" style="background: transparent; box-shadow: none; color: white;">
+            <div class="death-title">GAME OVER</div>
+            <div class="death-score">Final Score: <span id="finalScore">0</span></div>
+            
+            <div class="online-lb dark-lb">
+                <div class="lb-header" style="color:white;">BEST WORLDWIDE</div>
+                <div id="death-lb-list" style="width: 100%;">Loading...</div>
+            </div>
+
+            <button class="btn btn-white" id="retryBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG & LEADERBOARD ---
+        const DREAMLO_PUB = "697a67638f40bb1184c753d8";
+        const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
+        let currentLeaderboard = [];
+        let myName = "Player";
+        let hasLoadedLB = false;
+
+        async function fetchLeaderboard() {
+            const dreamloURL = `http://dreamlo.com/lb/${DREAMLO_PUB}/json`;
+            const parseData = (text) => {
+                try {
+                    const data = JSON.parse(text);
+                    let entries = [];
+                    if (data && data.dreamlo && data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
+                        entries = Array.isArray(data.dreamlo.leaderboard.entry) ? data.dreamlo.leaderboard.entry : [data.dreamlo.leaderboard.entry];
+                    }
+                    return entries.map(e => ({ name: e.name, score: parseInt(e.score) }));
+                } catch(e) { return null; }
+            };
+
+            let newScores = null;
+            try {
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(dreamloURL)}`;
+                const response = await fetch(proxyUrl);
+                const text = await response.text();
+                newScores = parseData(text);
+            } catch (e) {}
+
+            if (!newScores) {
+                try {
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(dreamloURL)}&t=${Date.now()}`;
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+                    if (data && data.contents) newScores = parseData(data.contents);
+                } catch (e) {}
+            }
+
+            if (newScores) {
+                currentLeaderboard = newScores;
+                hasLoadedLB = true;
+                updateOnlineLB(currentLeaderboard);
+            } else if (hasLoadedLB) {
+                updateOnlineLB(currentLeaderboard);
+            }
+        }
+
+        setInterval(fetchLeaderboard, 10000);
+        fetchLeaderboard();
+
+        function submitScore(name, score) {
+            if(score > 0) {
+                const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 12) || "Guest";
+                currentLeaderboard.push({ name: cleanName, score: score });
+                currentLeaderboard.sort((a,b) => b.score - a.score);
+                hasLoadedLB = true; 
+                updateOnlineLB(currentLeaderboard);
+
+                const targetUrl = `http://dreamlo.com/lb/${DREAMLO_PRIV}/add/${cleanName}/${score}`;
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+                fetch(proxyUrl).catch(e => console.log("Submit Error"));
+            }
+        }
+
+        function updateOnlineLB(entries) {
+            entries.sort((a,b) => b.score - a.score);
+            
+            if (!hasLoadedLB && entries.length === 0) {
+                 const loadingHtml = '<div style="text-align:center; opacity:0.5; padding:20px;">Loading...</div>';
+                 document.getElementById('main-lb-list').innerHTML = loadingHtml;
+                 document.getElementById('death-lb-list').innerHTML = loadingHtml;
+                 return;
+            }
+
+            const html = entries.length > 0 ? entries.slice(0, 5).map((e, i) => `
+                <div class="lb-row">
+                    <div class="lb-left">
+                        <div class="lb-rank">#${i+1}</div>
+                        <div class="lb-name">${e.name}</div>
+                    </div>
+                    <div class="lb-score">${e.score}</div>
+                </div>
+            `).join('') : '<div style="text-align:center; opacity:0.5; padding:20px;">No Scores Yet</div>';
+            
+            const mainList = document.getElementById('main-lb-list');
+            const deathList = document.getElementById('death-lb-list');
+            if(mainList) mainList.innerHTML = html;
+            if(deathList) deathList.innerHTML = html;
+        }
+
+        // --- SCREEN NAVIGATION ---
+        window.enterMainMenu = () => {
+            const input = document.getElementById('username-input');
+            const val = input.value.trim();
+            if (val) myName = val;
+            
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('active-layer');
+            
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('main-menu').classList.add('active-layer');
+        };
+
+        // --- GAME LOGIC ---
+        const GRID_SIZE = 9; 
+        const MIN_MATCH = 4; 
+        const COLORS = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd', '#ff9ff3', '#48dbfb'];
+        // Soft pastel colors mapped by index to the COLORS array
+        const PASTEL_COLORS = ['#ffcccc', '#fff5cc', '#ccf5e5', '#cce5ff', '#decceb', '#fccef5', '#ccf9ff'];
+
+        const SHAPES = [
+            [[0,0]], 
+            [[0,0], [1,0]], [[0,0], [0,1]],
+            [[0,0], [1,0], [2,0]], [[0,0], [0,1], [0,2]],
+            [[0,0], [1,0], [2,0], [3,0]], [[0,0], [0,1], [0,2], [0,3]],
+            [[0,0], [1,0], [0,1], [1,1]],
+            [[0,0], [0,1], [0,2], [1,2]], [[0,0], [1,0], [2,0], [0,1]],
+            [[0,0], [1,0], [2,0], [1,1]], [[1,0], [0,1], [1,1], [1,2]]
+        ];
+
+        class Game {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.ui = {
+                    menu: document.getElementById('main-menu'),
+                    game: document.getElementById('gameUI'),
+                    gameOver: document.getElementById('death-screen'),
+                    scoreBox: document.getElementById('scoreBox'),
+                    finalScore: document.getElementById('finalScore'),
+                    undoBtn: document.getElementById('undoBtn')
+                };
+
+                // State
+                this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
+                this.dockPieces = [];
+                this.particles = [];
+                this.floatingTexts = [];
+                this.placingBlocks = [];
+                this.clearingCells = new Set();
+                
+                this.history = null; 
+                this.score = 0;
+                this.dragPiece = null;
+                this.isAnimating = false;
+                this.isSpawning = false;
+                this.isDying = false; 
+                this.shake = 0;
+                this.flashAlpha = 0;
+                this.undoUsed = false;
+                
+                // Bg color state
+                this.bgRGB = [240, 242, 245]; // Default #f0f2f5
+                this.targetRGB = [240, 242, 245];
+
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.input = { x: 0, y: 0, isDown: false };
+                this.setupInput();
+
+                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('retryBtn').addEventListener('click', () => this.restart());
+                
+                // Undo
+                this.ui.undoBtn.addEventListener('click', () => {
+                    if(!this.undoUsed && this.history && !this.isAnimating && !this.isDying && this.state === 'PLAY') {
+                        this.performUndo();
+                        this.ui.undoBtn.classList.add('spin');
+                        setTimeout(() => this.ui.undoBtn.classList.remove('spin'), 500);
+                    }
+                });
+
+                this.loop();
+            }
+
+            resize() {
+                const maxWidth = Math.min(window.innerWidth * 0.95, 500);
+                this.width = maxWidth;
+                this.cellSize = (this.width - 40) / GRID_SIZE; 
+                this.dockHeight = this.cellSize * 5;
+                this.height = this.width + this.dockHeight;
+
+                this.canvas.width = this.width * 2; 
+                this.canvas.height = this.height * 2;
+                this.canvas.style.width = `${this.width}px`;
+                this.canvas.style.height = `${this.height}px`;
+                this.ctx.scale(2, 2);
+
+                this.boardTop = 30;
+                this.boardLeft = 20;
+            }
+
+            startGame() {
+                this.ui.menu.classList.add('hidden');
+                this.ui.menu.classList.remove('active-layer');
+                this.ui.game.classList.remove('hidden');
+                this.state = 'PLAY';
+                this.restart();
+            }
+
+            restart() {
+                this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
+                this.dockPieces = [];
+                this.score = 0;
+                this.dragPiece = null;
+                this.particles = [];
+                this.floatingTexts = [];
+                this.placingBlocks = [];
+                this.clearingCells.clear();
+                this.isDying = false;
+                this.isSpawning = false;
+                this.history = null;
+                
+                // Reset BG
+                this.bgRGB = [240, 242, 245];
+                this.targetRGB = [240, 242, 245];
+                
+                this.undoUsed = false;
+                this.ui.undoBtn.classList.add('disabled'); 
+                
+                this.ui.gameOver.classList.add('hidden');
+                this.ui.gameOver.classList.remove('active-layer');
+                
+                this.updateScore(0);
+                this.spawnPieces();
+            }
+
+            spawnPieces() {
+                this.isSpawning = true;
+                this.dockPieces = [];
+                const dockY = this.boardTop + (GRID_SIZE * this.cellSize) + (this.dockHeight * 0.5); 
+                const slotWidth = this.width / 3;
+
+                // Animate entering
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const shapeDef = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+                        const colorIdx = Math.floor(Math.random() * COLORS.length);
+                        const color = COLORS[colorIdx];
+                        
+                        let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+                        shapeDef.forEach(p => { 
+                            minX = Math.min(minX, p[0]); maxX = Math.max(maxX, p[0]);
+                            minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]);
+                        });
+                        
+                        const shapeW = (maxX - minX + 1) * this.cellSize;
+                        const shapeH = (maxY - minY + 1) * this.cellSize;
+                        const slotCenterX = (i * slotWidth) + (slotWidth / 2) + 15;
+                        const basePos = { x: slotCenterX - (shapeW / 2), y: dockY - (shapeH / 2) };
+
+                        this.dockPieces.push({
+                            shape: shapeDef, color: color,
+                            x: basePos.x, y: basePos.y,
+                            baseX: basePos.x, baseY: basePos.y,
+                            slotX: slotCenterX, slotY: dockY, 
+                            scale: 0, targetScale: 0.55, isDragging: false 
+                        });
+
+                        if(i === 2) {
+                            setTimeout(() => {
+                                this.isSpawning = false;
+                                this.checkGameOver();
+                            }, 200);
+                        }
+                    }, i * 200);
+                }
+            }
+
+            saveState() {
+                if (!this.undoUsed) {
+                    const deepPieces = this.dockPieces.map(p => ({...p})); 
+                    deepPieces.forEach(p => {
+                        p.x = p.baseX;
+                        p.y = p.baseY;
+                        p.isDragging = false;
+                    });
+
+                    this.history = {
+                        grid: JSON.parse(JSON.stringify(this.grid)),
+                        score: this.score,
+                        dockPieces: deepPieces,
+                        targetRGB: [...this.targetRGB]
+                    };
+                    this.ui.undoBtn.classList.remove('disabled');
+                }
+            }
+
+            performUndo() {
+                if(!this.history) return;
+                
+                this.grid = JSON.parse(JSON.stringify(this.history.grid));
+                this.score = this.history.score;
+                this.dockPieces = this.history.dockPieces.map(p => ({...p})); 
+                this.targetRGB = this.history.targetRGB;
+                
+                this.dragPiece = null;
+                this.input.isDown = false;
+                
+                this.updateScore(0);
+                
+                this.undoUsed = true;
+                this.ui.undoBtn.classList.add('disabled');
+                this.history = null; 
+            }
+
+            updateScore(pointsToAdd = 0) {
+                this.score += pointsToAdd;
+                this.ui.scoreBox.innerText = this.score;
+                if(pointsToAdd > 0) {
+                    this.ui.scoreBox.classList.remove('score-pop');
+                    void this.ui.scoreBox.offsetWidth; 
+                    this.ui.scoreBox.classList.add('score-pop');
+                }
+
+                // --- DYNAMIC OUTER BACKGROUND LOGIC ---
+                const level = Math.floor(this.score / 100);
+                if (level > 0) {
+                    const idx = (level - 1) % PASTEL_COLORS.length;
+                    const hex = PASTEL_COLORS[idx];
+                    this.targetRGB = this.hexToRgb(hex);
+                } else {
+                    this.targetRGB = [240, 242, 245]; // Default
+                }
+            }
+
+            hexToRgb(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return [r, g, b];
+            }
+
+            spawnFloatingText(text, x, y, color = '#2ed573') {
+                this.floatingTexts.push({ text: text, x: x, y: y, color: color, life: 1.0, velocityY: -2 });
+            }
+
+            placePiece(piece, gridX, gridY) {
+                this.saveState();
+                let drawX = this.input.x - (this.cellSize/2);
+                let drawY = this.input.y - (this.cellSize/2) - 70;
+                this.isAnimating = true; 
+                let blockCount = piece.shape.length;
+                let blocksLanded = 0;
+
+                for (let i = 0; i < piece.shape.length; i++) {
+                    const block = piece.shape[i];
+                    const targetX = this.boardLeft + (gridX + block[0]) * this.cellSize;
+                    const targetY = this.boardTop + (gridY + block[1]) * this.cellSize;
+                    const startX = drawX + (block[0] * this.cellSize);
+                    const startY = drawY + (block[1] * this.cellSize);
+
+                    setTimeout(() => {
+                        this.placingBlocks.push({
+                            x: startX, y: startY, tx: targetX, ty: targetY, color: piece.color, progress: 0,
+                            gridX: gridX + block[0], gridY: gridY + block[1],
+                            onFinish: () => {
+                                this.grid[gridY + block[1]][gridX + block[0]] = piece.color;
+                                blocksLanded++;
+                                if(blocksLanded === blockCount) this.finishPlacement();
+                            }
+                        });
+                    }, i * 35);
+                }
+                this.dockPieces = this.dockPieces.filter(p => p.slotX !== piece.slotX); 
+            }
+
+            finishPlacement() {
+                this.updateScore(10);
+                this.checkMatches();
+            }
+
+            checkMatches() {
+                let cellsToClear = new Set(); 
+                let rowsCleared = 0;
+                let colsCleared = 0;
+
+                // Horizontal
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    const row = this.grid[y];
+                    if (row.every(cell => cell !== null)) {
+                        let matchLen = 1;
+                        let rowHasMatch = false;
+                        for (let x = 1; x <= GRID_SIZE; x++) {
+                            let prev = this.grid[y][x-1];
+                            let curr = (x < GRID_SIZE) ? this.grid[y][x] : null;
+                            if (prev && curr === prev) matchLen++;
+                            else {
+                                if (matchLen >= MIN_MATCH) {
+                                    rowHasMatch = true;
+                                    for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x-1-k},${y}`);
+                                }
+                                matchLen = 1;
+                            }
+                        }
+                        if(rowHasMatch) rowsCleared++;
+                    }
+                }
+
+                // Vertical
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    let isColFull = true;
+                    for(let y=0; y<GRID_SIZE; y++) if(this.grid[y][x] === null) { isColFull = false; break; }
+                    if (isColFull) {
+                        let matchLen = 1;
+                        let colHasMatch = false;
+                        for (let y = 1; y <= GRID_SIZE; y++) {
+                            let prev = this.grid[y-1][x];
+                            let curr = (y < GRID_SIZE) ? this.grid[y][x] : null;
+                            if (prev && curr === prev) matchLen++;
+                            else {
+                                if (matchLen >= MIN_MATCH) {
+                                    colHasMatch = true;
+                                    for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x},${y-1-k}`);
+                                }
+                                matchLen = 1;
+                            }
+                        }
+                        if(colHasMatch) colsCleared++;
+                    }
+                }
+
+                if (cellsToClear.size > 0) {
+                    this.isAnimating = true;
+                    let finalClears = new Set();
+                    cellsToClear.forEach(key => {
+                        let [sx, sy] = key.split(',').map(Number);
+                        let scolor = this.grid[sy][sx];
+                        let queue = [{x: sx, y: sy}];
+                        while(queue.length > 0) {
+                            let {x, y} = queue.pop();
+                            let k = `${x},${y}`;
+                            if(finalClears.has(k)) continue;
+                            finalClears.add(k);
+                            const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+                            dirs.forEach(d => {
+                                let nx = x + d[0], ny = y + d[1];
+                                if(nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                                    if(this.grid[ny][nx] === scolor && !finalClears.has(`${nx},${ny}`)) queue.push({x: nx, y: ny});
+                                }
+                            });
+                        }
+                    });
+
+                    this.clearingCells = finalClears;
+                    if (rowsCleared + colsCleared > 1) setTimeout(() => this.spawnFloatingText(`COMBO!`, this.width/2, this.height/2 - 50, '#feca57'), 100);
+                    setTimeout(() => this.processClears(finalClears), 250);
+                } else {
+                    this.isAnimating = false;
+                    if (this.dockPieces.length === 0) this.spawnPieces();
+                    else this.checkGameOver();
+                }
+            }
+
+            processClears(cellsSet) {
+                let count = 0;
+                this.shake = 6 + Math.min(cellsSet.size, 10); 
+                this.flashAlpha = 0.5;
+                cellsSet.forEach(key => {
+                    const [x, y] = key.split(',').map(Number);
+                    this.spawnParticles(x, y, this.grid[y][x]);
+                    this.grid[y][x] = null;
+                    count++;
+                });
+                let points = (count * 20) + (count - 4) * 30;
+                this.updateScore(points);
+                this.spawnFloatingText(`+${points}`, this.width/2, this.height/2);
+                this.clearingCells.clear();
+                setTimeout(() => {
+                    this.isAnimating = false;
+                    if (this.dockPieces.length === 0) this.spawnPieces();
+                    else this.checkGameOver();
+                }, 300);
+            }
+
+            spawnParticles(gx, gy, color) {
+                const px = this.boardLeft + gx * this.cellSize;
+                const py = this.boardTop + gy * this.cellSize;
+                for(let i=0; i<8; i++) {
+                    this.particles.push({
+                        x: px + this.cellSize/2, y: py + this.cellSize/2,
+                        vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12,
+                        gravity: 0.5, rotation: Math.random() * Math.PI, rotSpeed: (Math.random() - 0.5) * 0.4,
+                        size: this.cellSize * (0.3 + Math.random()*0.3), color: color, life: 1.0, decay: 0.02
+                    });
+                }
+            }
+
+            checkGameOver() {
+                if (this.isAnimating || this.dockPieces.length === 0 || this.isDying || this.isSpawning) return;
+                let canMove = false;
+                for (let piece of this.dockPieces) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            if (this.canPlace(piece.shape, x, y)) { canMove = true; break; }
+                        }
+                        if (canMove) break;
+                    }
+                    if (canMove) break;
+                }
+                if (!canMove) this.startDeathAnimation();
+            }
+
+            startDeathAnimation() {
+                this.isDying = true;
+                this.ui.undoBtn.classList.add('disabled');
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    setTimeout(() => {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            if (this.grid[y][x]) {
+                                this.spawnParticles(x, y, this.grid[y][x]);
+                                this.grid[y][x] = null;
+                            }
+                        }
+                        this.shake = 2; 
+                    }, y * 100); 
+                }
+                setTimeout(() => {
+                    this.ui.finalScore.innerText = this.score;
+                    this.ui.gameOver.classList.remove('hidden');
+                    this.ui.gameOver.classList.add('active-layer');
+                    submitScore(myName, this.score);
+                }, GRID_SIZE * 100 + 800);
+            }
+
+            canPlace(shape, gridX, gridY) {
+                for (let block of shape) {
+                    let bx = gridX + block[0];
+                    let by = gridY + block[1];
+                    if (bx < 0 || bx >= GRID_SIZE || by < 0 || by >= GRID_SIZE) return false;
+                    if (this.grid[by][bx] !== null) return false;
+                }
+                return true;
+            }
+
+            draw() {
+                // Background Color Interpolation & Application to Outer Body
+                this.bgRGB[0] += (this.targetRGB[0] - this.bgRGB[0]) * 0.02;
+                this.bgRGB[1] += (this.targetRGB[1] - this.bgRGB[1]) * 0.02;
+                this.bgRGB[2] += (this.targetRGB[2] - this.bgRGB[2]) * 0.02;
+                const newColor = `rgb(${Math.round(this.bgRGB[0])}, ${Math.round(this.bgRGB[1])}, ${Math.round(this.bgRGB[2])})`;
+                document.documentElement.style.setProperty('--bg-color', newColor);
+                
+                this.ctx.save();
+                // Clear canvas so its static CSS background shows through
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                if(this.shake > 0) {
+                    const dx = (Math.random() - 0.5) * this.shake;
+                    const dy = (Math.random() - 0.5) * this.shake;
+                    this.ctx.translate(dx, dy);
+                    this.shake *= 0.9;
+                    if(this.shake < 0.5) this.shake = 0;
+                }
+
+                this.ctx.fillStyle = '#dfe4ea';
+                this.ctx.fillRect(this.boardLeft - 5, this.boardTop - 5, (GRID_SIZE * this.cellSize) + 10, (GRID_SIZE * this.cellSize) + 10);
+
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        let px = this.boardLeft + x * this.cellSize;
+                        let py = this.boardTop + y * this.cellSize;
+                        this.drawRoundedRect(px, py, this.cellSize, '#f1f2f6', false);
+                        if (this.grid[y][x]) this.drawRoundedRect(px, py, this.cellSize, this.grid[y][x], true);
+                    }
+                }
+
+                for (let i = this.placingBlocks.length - 1; i >= 0; i--) {
+                    let b = this.placingBlocks[i];
+                    b.progress += 0.08; 
+                    if(b.progress > 1) b.progress = 1;
+                    const t = b.progress;
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    let curX = b.x + (b.tx - b.x) * ease;
+                    let curY = b.y + (b.ty - b.y) * ease;
+                    this.drawRoundedRect(curX, curY, this.cellSize, b.color, true);
+                    if(b.progress === 1) { b.onFinish(); this.placingBlocks.splice(i, 1); }
+                }
+
+                if (this.clearingCells.size > 0) {
+                    this.ctx.save();
+                    this.clearingCells.forEach(key => {
+                        const [x, y] = key.split(',').map(Number);
+                        const px = this.boardLeft + x * this.cellSize;
+                        const py = this.boardTop + y * this.cellSize;
+                        this.drawRoundedRect(px, py, this.cellSize, 'white', true, false, true); 
+                    });
+                    this.ctx.restore();
+                }
+
+                for(let i = this.particles.length - 1; i >= 0; i--) {
+                    let p = this.particles[i];
+                    p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
+                    p.rotation += p.rotSpeed;
+                    p.life -= p.decay; p.size *= 0.98;
+                    if(p.life <= 0) this.particles.splice(i, 1);
+                    else {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = p.life;
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.rotate(p.rotation);
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                        this.ctx.restore();
+                    }
+                }
+
+                if (this.dragPiece && !this.isAnimating) {
+                    const snap = this.getSnapCoordinates(this.dragPiece);
+                    if (snap && this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                        this.ctx.globalAlpha = 0.3;
+                        for (let block of this.dragPiece.shape) {
+                            let px = this.boardLeft + (snap.gridX + block[0]) * this.cellSize;
+                            let py = this.boardTop + (snap.gridY + block[1]) * this.cellSize;
+                            this.drawRoundedRect(px, py, this.cellSize, this.dragPiece.color, true);
+                        }
+                        this.ctx.globalAlpha = 1.0;
+                    }
+                }
+
+                if (!this.isDying) {
+                    for (let piece of this.dockPieces) {
+                        // Animate Scale
+                        if(!piece.isDragging && piece.scale < piece.targetScale) {
+                            piece.scale += 0.05;
+                            if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
+                        }
+
+                        let scale = piece.isDragging ? 1.0 : piece.scale;
+                        if(scale <= 0) continue;
+
+                        let offsetY = piece.isDragging ? -70 : 0;
+                        let drawX = piece.isDragging ? this.input.x - (this.cellSize/2) : piece.x;
+                        let drawY = piece.isDragging ? this.input.y - (this.cellSize/2) + offsetY : piece.y;
+
+                        if (piece.isDragging) {
+                            this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                            for (let block of piece.shape) {
+                                let bx = drawX + (block[0] * this.cellSize * scale) + 10;
+                                let by = drawY + (block[1] * this.cellSize * scale) + 20;
+                                this.drawRoundedRect(bx, by, this.cellSize * scale, 'black', true, true);
+                            }
+                        }
+
+                        for (let block of piece.shape) {
+                            let bx = drawX + (block[0] * this.cellSize * scale);
+                            let by = drawY + (block[1] * this.cellSize * scale);
+                            this.drawRoundedRect(bx, by, this.cellSize * scale, piece.color, true);
+                        }
+                    }
+                }
+
+                this.ctx.restore(); 
+
+                if(this.flashAlpha > 0) {
+                    this.ctx.fillStyle = `rgba(255,255,255,${this.flashAlpha})`;
+                    this.ctx.fillRect(0, 0, this.width, this.height);
+                    this.flashAlpha -= 0.05;
+                }
+
+                for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+                    let t = this.floatingTexts[i];
+                    t.y += t.velocityY; t.life -= 0.01;
+                    if(t.life <= 0) this.floatingTexts.splice(i, 1);
+                    else {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = t.life;
+                        this.ctx.fillStyle = t.color;
+                        this.ctx.font = "900 32px 'Segoe UI'";
+                        this.ctx.textAlign = "center";
+                        this.ctx.shadowColor = "rgba(0,0,0,0.2)";
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.fillText(t.text, t.x, t.y);
+                        this.ctx.restore();
+                    }
+                }
+            }
+
+            drawRoundedRect(x, y, size, color, isFilled, isShadow=false, isFlash=false) {
+                if(isFlash) {
+                    this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    let s = size;
+                    this.ctx.beginPath();
+                    this.ctx.roundRect(x, y, s, s, 6);
+                    this.ctx.fill();
+                    return;
+                }
+                this.ctx.fillStyle = isShadow ? 'rgba(0,0,0,0.2)' : color;
+                let radius = isFilled ? 6 : 4;
+                let gap = (isFilled && !isShadow) ? 2 : 2;
+                let s = size - gap*2;
+                let finalX = x + gap;
+                let finalY = y + gap;
+                this.ctx.beginPath();
+                this.ctx.moveTo(finalX + radius, finalY);
+                this.ctx.lineTo(finalX + s - radius, finalY);
+                this.ctx.quadraticCurveTo(finalX + s, finalY, finalX + s, finalY + radius);
+                this.ctx.lineTo(finalX + s, finalY + s - radius);
+                this.ctx.quadraticCurveTo(finalX + s, finalY + s, finalX + s - radius, finalY + s);
+                this.ctx.lineTo(finalX + radius, finalY + s);
+                this.ctx.quadraticCurveTo(finalX, finalY + s, finalX, finalY + s - radius);
+                this.ctx.lineTo(finalX, finalY + radius);
+                this.ctx.quadraticCurveTo(finalX, finalY, finalX + radius, finalY);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+
+            getSnapCoordinates(piece) {
+                let fingerY = this.input.y - 70; 
+                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
+                let relY = fingerY - this.boardTop - (this.cellSize/2);
+                let gridX = Math.round(relX / this.cellSize);
+                let gridY = Math.round(relY / this.cellSize);
+                return { gridX, gridY };
+            }
+
+            onDown(e) {
+                e.preventDefault();
+                if(this.isAnimating || this.isDying) return; 
+                this.setPos(e);
+                this.input.isDown = true;
+                
+                let closestDist = Infinity;
+                let closestPiece = null;
+                for (let piece of this.dockPieces) {
+                    let dx = this.input.x - piece.slotX;
+                    let dy = this.input.y - piece.slotY;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < this.cellSize * 4 && dist < closestDist) {
+                        closestDist = dist;
+                        closestPiece = piece;
+                    }
+                }
+                
+                if (closestPiece) {
+                    this.dragPiece = closestPiece;
+                    closestPiece.isDragging = true;
+                }
+            }
+
+            onMove(e) {
+                e.preventDefault();
+                if (!this.input.isDown) return;
+                this.setPos(e);
+            }
+
+            onUp(e) {
+                e.preventDefault();
+                this.input.isDown = false;
+                if (this.dragPiece) {
+                    const snap = this.getSnapCoordinates(this.dragPiece);
+                    if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                        this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
+                    } else {
+                        this.dragPiece.x = this.dragPiece.baseX;
+                        this.dragPiece.y = this.dragPiece.baseY;
+                    }
+                    this.dragPiece.isDragging = false;
+                    this.dragPiece = null;
+                }
+            }
+
+            setPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                this.input.x = (clientX - rect.left) * (this.width / rect.width);
+                this.input.y = (clientY - rect.top) * (this.height / rect.height);
+            }
+
+            setupInput() {
+                this.canvas.addEventListener('mousedown', e => this.onDown(e));
+                window.addEventListener('mousemove', e => this.onMove(e));
+                window.addEventListener('mouseup', e => this.onUp(e));
+                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
+                window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
+                window.addEventListener('touchend', e => this.onUp(e), {passive: false});
+            }
+
+            loop() {
+                this.draw();
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        window.addEventListener('load', () => {
+             const game = new Game();
+        });
+
+    </script>
+</body>
+</html>
