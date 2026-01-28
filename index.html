@@ -14,6 +14,7 @@
 
     <style>
         :root {
+            /* This variable will be updated by JS for smooth transitions */
             --bg-color: #f0f2f5; 
             --grid-bg: #dfe4ea;
             --text-color: #2f3542;
@@ -24,7 +25,7 @@
 
         body {
             margin: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-color); /* The outer background */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -36,7 +37,7 @@
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
-            transition: background-color 0.1s linear;
+            transition: background-color 0.1s linear; /* Smooth CSS transition helper */
         }
 
         /* --- UI LAYERS --- */
@@ -51,8 +52,8 @@
             z-index: 20;
         }
 
-        .active-layer { pointer-events: auto; }
-        .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
+        .active-layer { pointer-events: all; }
+        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 
         /* --- SCREENS --- */
         #start-screen { background: var(--accent); z-index: 300; }
@@ -76,6 +77,7 @@
             box-sizing: border-box;
         }
 
+        /* Start Screen Specifics */
         .start-container {
             padding: 40px;
             text-align: center;
@@ -83,8 +85,6 @@
             flex-direction: column;
             align-items: center;
             gap: 30px;
-            width: 100%;
-            pointer-events: auto;
         }
 
         .big-logo {
@@ -104,15 +104,11 @@
             text-align: center; font-weight: 800; letter-spacing: 1px;
             text-transform: uppercase;
             transition: 0.3s;
-            pointer-events: auto;
-            user-select: text !important;
-            -webkit-user-select: text !important;
-            touch-action: pan-x pan-y;
-            z-index: 301; 
         }
         #username-input::placeholder { color: rgba(255,255,255,0.6); }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
+        /* Main Menu Logo */
         .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .logo-block {
             width: 45px; height: 45px; border-radius: 12px;
@@ -159,12 +155,12 @@
         .lb-score { font-weight: 900; color: var(--primary); font-size: 24px; }
         .dark-lb .lb-score { color: white; }
 
+        /* Buttons */
         .btn {
             border: none; padding: 22px 70px; font-size: 1.6rem; border-radius: 18px;
             cursor: pointer; font-weight: 900; transition: transform 0.1s;
             box-shadow: 0 12px 30px rgba(0,0,0,0.2);
             text-transform: uppercase; letter-spacing: 1px;
-            pointer-events: auto;
         }
         .btn:hover { transform: translateY(-3px); }
         .btn:active { transform: scale(0.96); }
@@ -204,38 +200,18 @@
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
             color: var(--text-color);
-            pointer-events: auto;
         }
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
         .spin { animation: spin 0.5s ease-out; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* INSTALL POPUP */
-        #install-modal {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: flex-end; justify-content: center;
-            background: rgba(0,0,0,0.4); z-index: 500; pointer-events: auto;
-            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.5s;
-        }
-        .install-card {
-            background: white; width: 90%; max-width: 400px;
-            border-radius: 24px; padding: 30px; margin-bottom: 30px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: translateY(100px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #install-modal.active { opacity: 1; }
-        #install-modal.active .install-card { transform: translateY(0); }
-        .install-title { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
-        .install-text { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
-        .ios-instruction { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; color: #333; margin: 10px 0; }
-        .close-link { display: block; margin-top: 15px; color: #999; font-size: 14px; text-decoration: none; cursor: pointer; }
-
+        /* Canvas - The Inner Background */
         canvas {
-            background: white; border-radius: 20px;
+            background: white; /* Static inner background */
+            border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
             cursor: grab; max-width: 95vw;
-            touch-action: none;
         }
         canvas:active { cursor: grabbing; }
 
@@ -251,7 +227,6 @@
             .icon-btn { width: 70px; height: 70px; }
             .btn { font-size: 1.3rem; padding: 20px 50px; }
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
-            #username-input { width: 240px; font-size: 20px; }
         }
     </style>
 </head>
@@ -314,20 +289,6 @@
             </div>
 
             <button class="btn btn-white" id="retryBtn">Play Again</button>
-        </div>
-    </div>
-
-    <div id="install-modal" class="hidden">
-        <div class="install-card">
-            <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
-            <div class="install-title">Install App</div>
-            <div class="install-text" id="install-desc">Add Mosaic Fit to your home screen for the full screen experience.</div>
-            <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem;">Install Now</button>
-            <div id="ios-install-hint" style="display:none;">
-                <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
-                <div class="ios-instruction">2. Select "Add to Home Screen"</div>
-            </div>
-            <a class="close-link" onclick="closeInstallModal()">Not Now</a>
         </div>
     </div>
 
@@ -421,53 +382,6 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- INSTALL POPUP LOGIC ---
-        let deferredPrompt;
-        window.addEventListener('load', () => {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            const hasDismissed = localStorage.getItem('installPromptDismissed');
-            
-            if (!isStandalone && !hasDismissed) {
-                setTimeout(showInstallPromotion, 2000);
-            }
-        });
-
-        function showInstallPromotion() {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            const isIOS = /iphone|ipad|ipod/.test(userAgent);
-            const modal = document.getElementById('install-modal');
-
-            if (isIOS) {
-                document.getElementById('ios-install-hint').style.display = 'block';
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.add('active'), 10);
-            } else {
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    document.getElementById('android-install-btn').style.display = 'inline-block';
-                    modal.classList.remove('hidden');
-                    setTimeout(() => modal.classList.add('active'), 10);
-                });
-            }
-        }
-
-        document.getElementById('android-install-btn').addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    closeInstallModal();
-                });
-            }
-        });
-
-        window.closeInstallModal = () => {
-            const modal = document.getElementById('install-modal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 500);
-            localStorage.setItem('installPromptDismissed', 'true');
-        };
-
         // --- SCREEN NAVIGATION ---
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
@@ -485,6 +399,7 @@
         const GRID_SIZE = 9; 
         const MIN_MATCH = 4; 
         const COLORS = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd', '#ff9ff3', '#48dbfb'];
+        // Soft pastel colors mapped by index to the COLORS array
         const PASTEL_COLORS = ['#ffcccc', '#fff5cc', '#ccf5e5', '#cce5ff', '#decceb', '#fccef5', '#ccf9ff'];
 
         const SHAPES = [
@@ -529,7 +444,8 @@
                 this.flashAlpha = 0;
                 this.undoUsed = false;
                 
-                this.bgRGB = [240, 242, 245]; 
+                // Bg color state
+                this.bgRGB = [240, 242, 245]; // Default #f0f2f5
                 this.targetRGB = [240, 242, 245];
 
                 this.resize();
@@ -540,6 +456,7 @@
                 document.getElementById('startBtn').addEventListener('click', () => this.startGame());
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
                 
+                // Undo
                 this.ui.undoBtn.addEventListener('click', () => {
                     if(!this.undoUsed && this.history && !this.isAnimating && !this.isDying && this.state === 'PLAY') {
                         this.performUndo();
@@ -589,6 +506,8 @@
                 this.isSpawning = false;
                 this.history = null;
                 
+                // Reset BG
+                this.bgRGB = [240, 242, 245];
                 this.targetRGB = [240, 242, 245];
                 
                 this.undoUsed = false;
@@ -607,6 +526,7 @@
                 const dockY = this.boardTop + (GRID_SIZE * this.cellSize) + (this.dockHeight * 0.5); 
                 const slotWidth = this.width / 3;
 
+                // Animate entering
                 for (let i = 0; i < 3; i++) {
                     setTimeout(() => {
                         const shapeDef = SHAPES[Math.floor(Math.random() * SHAPES.length)];
@@ -688,13 +608,14 @@
                     this.ui.scoreBox.classList.add('score-pop');
                 }
 
+                // --- DYNAMIC OUTER BACKGROUND LOGIC ---
                 const level = Math.floor(this.score / 100);
                 if (level > 0) {
                     const idx = (level - 1) % PASTEL_COLORS.length;
                     const hex = PASTEL_COLORS[idx];
                     this.targetRGB = this.hexToRgb(hex);
                 } else {
-                    this.targetRGB = [240, 242, 245]; 
+                    this.targetRGB = [240, 242, 245]; // Default
                 }
             }
 
@@ -909,6 +830,7 @@
             }
 
             draw() {
+                // Background Color Interpolation & Application to Outer Body
                 this.bgRGB[0] += (this.targetRGB[0] - this.bgRGB[0]) * 0.02;
                 this.bgRGB[1] += (this.targetRGB[1] - this.bgRGB[1]) * 0.02;
                 this.bgRGB[2] += (this.targetRGB[2] - this.bgRGB[2]) * 0.02;
@@ -916,6 +838,7 @@
                 document.documentElement.style.setProperty('--bg-color', newColor);
                 
                 this.ctx.save();
+                // Clear canvas so its static CSS background shows through
                 this.ctx.clearRect(0, 0, this.width, this.height);
 
                 if(this.shake > 0) {
@@ -1003,23 +926,8 @@
                         if(scale <= 0) continue;
 
                         let offsetY = piece.isDragging ? -70 : 0;
-                        
-                        // Default position (dock)
-                        let drawX = piece.x;
-                        let drawY = piece.y;
-
-                        // Override if dragging
-                        if (piece.isDragging) {
-                            drawX = this.input.x - (this.cellSize/2);
-                            drawY = this.input.y - (this.cellSize/2) + offsetY;
-                            
-                            // Safety Check for NaN coordinates which causes "Vanishing Block" bug
-                            if (isNaN(drawX) || isNaN(drawY)) {
-                                // Reset to dock position if input is invalid
-                                drawX = piece.x;
-                                drawY = piece.y;
-                            }
-                        }
+                        let drawX = piece.isDragging ? this.input.x - (this.cellSize/2) : piece.x;
+                        let drawY = piece.isDragging ? this.input.y - (this.cellSize/2) + offsetY : piece.y;
 
                         if (piece.isDragging) {
                             this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -1065,9 +973,6 @@
             }
 
             drawRoundedRect(x, y, size, color, isFilled, isShadow=false, isFlash=false) {
-                // Safety check to prevent crashing the renderer
-                if (isNaN(x) || isNaN(y) || isNaN(size)) return;
-
                 if(isFlash) {
                     this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
                     let s = size;
@@ -1096,48 +1001,28 @@
                 this.ctx.fill();
             }
 
-            setPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                let cx = 0, cy = 0;
-                
-                if (e.changedTouches && e.changedTouches.length > 0) {
-                    cx = e.changedTouches[0].clientX;
-                    cy = e.changedTouches[0].clientY;
-                } else if (e.touches && e.touches.length > 0) {
-                    cx = e.touches[0].clientX;
-                    cy = e.touches[0].clientY;
-                } else if (typeof e.clientX !== 'undefined') {
-                    cx = e.clientX;
-                    cy = e.clientY;
-                }
-
-                if(rect.width > 0 && rect.height > 0) {
-                    this.input.x = (cx - rect.left) * (this.width / rect.width);
-                    this.input.y = (cy - rect.top) * (this.height / rect.height);
-                }
+            getSnapCoordinates(piece) {
+                let fingerY = this.input.y - 70; 
+                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
+                let relY = fingerY - this.boardTop - (this.cellSize/2);
+                let gridX = Math.round(relX / this.cellSize);
+                let gridY = Math.round(relY / this.cellSize);
+                return { gridX, gridY };
             }
 
             onDown(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
                 e.preventDefault();
-                
-                if (this.state !== 'PLAY') return;
-                if(this.isAnimating || this.isDying || this.isSpawning) return;
-
+                if(this.isAnimating || this.isDying) return; 
                 this.setPos(e);
                 this.input.isDown = true;
                 
                 let closestDist = Infinity;
                 let closestPiece = null;
-                
                 for (let piece of this.dockPieces) {
                     let dx = this.input.x - piece.slotX;
                     let dy = this.input.y - piece.slotY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    // Reduced grab radius (1.5x) to prevent accidental multisnapping
-                    if (dist < this.cellSize * 1.5 && dist < closestDist) {
+                    if (dist < this.cellSize * 4 && dist < closestDist) {
                         closestDist = dist;
                         closestPiece = piece;
                     }
@@ -1150,16 +1035,13 @@
             }
 
             onMove(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                if (!this.input.isDown) return;
-                
                 e.preventDefault();
+                if (!this.input.isDown) return;
                 this.setPos(e);
             }
 
             onUp(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
+                e.preventDefault();
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
@@ -1174,12 +1056,19 @@
                 }
             }
 
+            setPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                this.input.x = (clientX - rect.left) * (this.width / rect.width);
+                this.input.y = (clientY - rect.top) * (this.height / rect.height);
+            }
+
             setupInput() {
-                window.addEventListener('mousedown', e => this.onDown(e));
+                this.canvas.addEventListener('mousedown', e => this.onDown(e));
                 window.addEventListener('mousemove', e => this.onMove(e));
                 window.addEventListener('mouseup', e => this.onUp(e));
-                
-                window.addEventListener('touchstart', e => this.onDown(e), {passive: false});
+                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
                 window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
                 window.addEventListener('touchend', e => this.onUp(e), {passive: false});
             }
