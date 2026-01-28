@@ -32,7 +32,7 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* Disables double-tap zoom */
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
@@ -51,8 +51,8 @@
             z-index: 20;
         }
 
-        .active-layer { pointer-events: all; }
-        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .active-layer { pointer-events: auto; } /* Allow clicks on active layer */
+        .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
         /* --- SCREENS --- */
         #start-screen { background: var(--accent); z-index: 300; }
@@ -84,7 +84,8 @@
             flex-direction: column;
             align-items: center;
             gap: 30px;
-            pointer-events: auto; /* Ensure touches pass to children */
+            width: 100%;
+            pointer-events: auto; /* Ensure touches work here */
         }
 
         .big-logo {
@@ -96,7 +97,6 @@
             animation: float 4s ease-in-out infinite;
         }
 
-        /* FIX FOR MOBILE INPUT */
         #username-input { 
             background: rgba(255,255,255,0.2); 
             border: 3px solid rgba(255,255,255,0.4); 
@@ -108,10 +108,10 @@
             
             /* Critical Mobile Fixes */
             pointer-events: auto;
-            user-select: text;
-            -webkit-user-select: text;
-            touch-action: manipulation;
-            z-index: 301; /* Ensure on top */
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            touch-action: pan-x pan-y; /* Allow scrolling/interaction */
+            z-index: 301; 
         }
         #username-input::placeholder { color: rgba(255,255,255,0.6); }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
@@ -266,6 +266,7 @@
         <div class="start-container">
             <div class="big-logo">M</div>
             <input type="text" id="username-input" placeholder="ENTER USERNAME" maxlength="12">
+            
             <button class="btn btn-white" style="margin-top: 25px; color: var(--accent);" onclick="enterMainMenu()">ENTER</button>
         </div>
     </div>
@@ -327,18 +328,11 @@
             <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
             <div class="install-title">Install App</div>
             <div class="install-text" id="install-desc">Add Mosaic Fit to your home screen for the full screen experience.</div>
-            
             <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem;">Install Now</button>
-            
             <div id="ios-install-hint" style="display:none;">
-                <div class="ios-instruction">
-                    1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share
-                </div>
-                <div class="ios-instruction">
-                    2. Select "Add to Home Screen"
-                </div>
+                <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
+                <div class="ios-instruction">2. Select "Add to Home Screen"</div>
             </div>
-
             <a class="close-link" onclick="closeInstallModal()">Not Now</a>
         </div>
     </div>
@@ -541,7 +535,6 @@
                 this.flashAlpha = 0;
                 this.undoUsed = false;
                 
-                // Bg color state
                 this.bgRGB = [240, 242, 245]; 
                 this.targetRGB = [240, 242, 245];
 
@@ -1101,6 +1094,11 @@
             }
 
             onDown(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
+                // Only allow game interaction in PLAY state
+                if (this.state !== 'PLAY') return;
+
                 e.preventDefault();
                 if(this.isAnimating || this.isDying) return; 
                 this.setPos(e);
@@ -1125,12 +1123,17 @@
             }
 
             onMove(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                if (this.state !== 'PLAY') return;
+
                 e.preventDefault();
                 if (!this.input.isDown) return;
                 this.setPos(e);
             }
 
             onUp(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
                 e.preventDefault();
                 this.input.isDown = false;
                 if (this.dragPiece) {
