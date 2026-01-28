@@ -14,7 +14,6 @@
 
     <style>
         :root {
-            /* This variable will be updated by JS for smooth transitions */
             --bg-color: #f0f2f5; 
             --grid-bg: #dfe4ea;
             --text-color: #2f3542;
@@ -25,7 +24,7 @@
 
         body {
             margin: 0;
-            background-color: var(--bg-color); /* The outer background */
+            background-color: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -37,7 +36,7 @@
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
-            transition: background-color 0.1s linear; /* Smooth CSS transition helper */
+            transition: background-color 0.1s linear;
         }
 
         /* --- UI LAYERS --- */
@@ -52,39 +51,30 @@
             z-index: 20;
         }
 
-        .active-layer { pointer-events: all; }
-        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        /* Essential: Allow clicks on active UI layers */
+        .active-layer { pointer-events: auto; }
+        .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
         /* --- SCREENS --- */
         #start-screen { background: var(--accent); z-index: 300; }
         #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); }
         #death-screen { background: var(--accent); z-index: 250; }
 
-        /* --- MENU CONTAINERS --- */
         .menu-container {
             padding: 40px 50px;
             border-radius: 30px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
+            display: flex; flex-direction: column; align-items: center; gap: 25px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.15);
-            max-width: 95%;
-            max-height: 98vh;
-            overflow-y: auto;
-            overflow-x: hidden;
+            max-width: 95%; max-height: 98vh;
+            overflow-y: auto; overflow-x: hidden;
             box-sizing: border-box;
         }
 
-        /* Start Screen Specifics */
         .start-container {
-            padding: 40px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+            padding: 40px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 30px;
+            width: 100%;
         }
 
         .big-logo {
@@ -96,19 +86,23 @@
             animation: float 4s ease-in-out infinite;
         }
 
+        /* INPUT FIXES FOR MOBILE */
         #username-input { 
             background: rgba(255,255,255,0.2); 
             border: 3px solid rgba(255,255,255,0.4); 
             padding: 20px 30px; color: white; font-size: 24px; 
             border-radius: 60px; outline: none; width: 300px; 
             text-align: center; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: 0.3s;
+            text-transform: uppercase; transition: 0.3s;
+            
+            /* Enable Interaction */
+            pointer-events: auto;
+            user-select: text; 
+            -webkit-user-select: text;
+            z-index: 1000;
         }
-        #username-input::placeholder { color: rgba(255,255,255,0.6); }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
-        /* Main Menu Logo */
         .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .logo-block {
             width: 45px; height: 45px; border-radius: 12px;
@@ -119,17 +113,15 @@
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-        /* Leaderboard */
+        /* LEADERBOARD */
         .online-lb { 
             width: 100%; min-width: 360px; max-width: 500px;
             background: rgba(0,0,0,0.04); 
             border-radius: 24px; padding: 30px; 
             border: 2px solid rgba(0,0,0,0.05); 
-            margin-bottom: 10px;
-            box-sizing: border-box;
+            margin-bottom: 10px; box-sizing: border-box;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
-        
         .lb-header { 
             text-align: center; font-size: 18px; letter-spacing: 3px; 
             font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase;
@@ -155,19 +147,20 @@
         .lb-score { font-weight: 900; color: var(--primary); font-size: 24px; }
         .dark-lb .lb-score { color: white; }
 
-        /* Buttons */
         .btn {
             border: none; padding: 22px 70px; font-size: 1.6rem; border-radius: 18px;
             cursor: pointer; font-weight: 900; transition: transform 0.1s;
             box-shadow: 0 12px 30px rgba(0,0,0,0.2);
             text-transform: uppercase; letter-spacing: 1px;
+            pointer-events: auto; /* Fix clicks */
+            z-index: 1000;
         }
         .btn:hover { transform: translateY(-3px); }
         .btn:active { transform: scale(0.96); }
         .btn-accent { background: var(--accent); color: white; } 
         .btn-white { background: white; color: var(--accent); }
 
-        /* Game UI */
+        /* GAME UI */
         .header {
             position: absolute; top: 30px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
@@ -200,18 +193,38 @@
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
             color: var(--text-color);
+            pointer-events: auto; /* Fix clicks */
         }
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
         .spin { animation: spin 0.5s ease-out; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Canvas - The Inner Background */
+        /* INSTALL POPUP */
+        #install-modal {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.4); z-index: 500; pointer-events: auto;
+            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.5s;
+        }
+        .install-card {
+            background: white; width: 90%; max-width: 400px;
+            border-radius: 24px; padding: 30px; margin-bottom: 30px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: translateY(100px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #install-modal.active { opacity: 1; }
+        #install-modal.active .install-card { transform: translateY(0); }
+        .install-title { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
+        .install-text { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        .ios-instruction { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; color: #333; margin: 10px 0; }
+        .close-link { display: block; margin-top: 15px; color: #999; font-size: 14px; text-decoration: none; cursor: pointer; }
+
         canvas {
-            background: white; /* Static inner background */
-            border-radius: 20px;
+            background: white; border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
             cursor: grab; max-width: 95vw;
+            touch-action: none;
         }
         canvas:active { cursor: grabbing; }
 
@@ -227,6 +240,7 @@
             .icon-btn { width: 70px; height: 70px; }
             .btn { font-size: 1.3rem; padding: 20px 50px; }
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
+            #username-input { width: 240px; font-size: 20px; }
         }
     </style>
 </head>
@@ -292,8 +306,21 @@
         </div>
     </div>
 
+    <div id="install-modal" class="hidden">
+        <div class="install-card">
+            <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
+            <div class="install-title">Install App</div>
+            <div class="install-text" id="install-desc">Add Mosaic Fit to your home screen for the full screen experience.</div>
+            <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem;">Install Now</button>
+            <div id="ios-install-hint" style="display:none;">
+                <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
+                <div class="ios-instruction">2. Select "Add to Home Screen"</div>
+            </div>
+            <a class="close-link" onclick="closeInstallModal()">Not Now</a>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIG & LEADERBOARD ---
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -382,7 +409,48 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- SCREEN NAVIGATION ---
+        // --- INSTALL POPUP ---
+        let deferredPrompt;
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            const hasDismissed = localStorage.getItem('installPromptDismissed');
+            if (!isStandalone && !hasDismissed) setTimeout(showInstallPromotion, 2000);
+        });
+
+        function showInstallPromotion() {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+            const modal = document.getElementById('install-modal');
+
+            if (isIOS) {
+                document.getElementById('ios-install-hint').style.display = 'block';
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('active'), 10);
+            } else {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    document.getElementById('android-install-btn').style.display = 'inline-block';
+                    modal.classList.remove('hidden');
+                    setTimeout(() => modal.classList.add('active'), 10);
+                });
+            }
+        }
+
+        document.getElementById('android-install-btn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => closeInstallModal());
+            }
+        });
+
+        window.closeInstallModal = () => {
+            const modal = document.getElementById('install-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 500);
+            localStorage.setItem('installPromptDismissed', 'true');
+        };
+
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
             const val = input.value.trim();
@@ -395,11 +463,9 @@
             document.getElementById('main-menu').classList.add('active-layer');
         };
 
-        // --- GAME LOGIC ---
         const GRID_SIZE = 9; 
         const MIN_MATCH = 4; 
         const COLORS = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd', '#ff9ff3', '#48dbfb'];
-        // Soft pastel colors mapped by index to the COLORS array
         const PASTEL_COLORS = ['#ffcccc', '#fff5cc', '#ccf5e5', '#cce5ff', '#decceb', '#fccef5', '#ccf9ff'];
 
         const SHAPES = [
@@ -426,7 +492,6 @@
                     undoBtn: document.getElementById('undoBtn')
                 };
 
-                // State
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
                 this.dockPieces = [];
                 this.particles = [];
@@ -444,8 +509,7 @@
                 this.flashAlpha = 0;
                 this.undoUsed = false;
                 
-                // Bg color state
-                this.bgRGB = [240, 242, 245]; // Default #f0f2f5
+                this.bgRGB = [240, 242, 245]; 
                 this.targetRGB = [240, 242, 245];
 
                 this.resize();
@@ -456,7 +520,6 @@
                 document.getElementById('startBtn').addEventListener('click', () => this.startGame());
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
                 
-                // Undo
                 this.ui.undoBtn.addEventListener('click', () => {
                     if(!this.undoUsed && this.history && !this.isAnimating && !this.isDying && this.state === 'PLAY') {
                         this.performUndo();
@@ -505,17 +568,11 @@
                 this.isDying = false;
                 this.isSpawning = false;
                 this.history = null;
-                
-                // Reset BG
-                this.bgRGB = [240, 242, 245];
                 this.targetRGB = [240, 242, 245];
-                
                 this.undoUsed = false;
                 this.ui.undoBtn.classList.add('disabled'); 
-                
                 this.ui.gameOver.classList.add('hidden');
                 this.ui.gameOver.classList.remove('active-layer');
-                
                 this.updateScore(0);
                 this.spawnPieces();
             }
@@ -526,7 +583,6 @@
                 const dockY = this.boardTop + (GRID_SIZE * this.cellSize) + (this.dockHeight * 0.5); 
                 const slotWidth = this.width / 3;
 
-                // Animate entering
                 for (let i = 0; i < 3; i++) {
                     setTimeout(() => {
                         const shapeDef = SHAPES[Math.floor(Math.random() * SHAPES.length)];
@@ -565,12 +621,7 @@
             saveState() {
                 if (!this.undoUsed) {
                     const deepPieces = this.dockPieces.map(p => ({...p})); 
-                    deepPieces.forEach(p => {
-                        p.x = p.baseX;
-                        p.y = p.baseY;
-                        p.isDragging = false;
-                    });
-
+                    deepPieces.forEach(p => { p.x = p.baseX; p.y = p.baseY; p.isDragging = false; });
                     this.history = {
                         grid: JSON.parse(JSON.stringify(this.grid)),
                         score: this.score,
@@ -583,17 +634,13 @@
 
             performUndo() {
                 if(!this.history) return;
-                
                 this.grid = JSON.parse(JSON.stringify(this.history.grid));
                 this.score = this.history.score;
                 this.dockPieces = this.history.dockPieces.map(p => ({...p})); 
                 this.targetRGB = this.history.targetRGB;
-                
                 this.dragPiece = null;
                 this.input.isDown = false;
-                
                 this.updateScore(0);
-                
                 this.undoUsed = true;
                 this.ui.undoBtn.classList.add('disabled');
                 this.history = null; 
@@ -607,15 +654,13 @@
                     void this.ui.scoreBox.offsetWidth; 
                     this.ui.scoreBox.classList.add('score-pop');
                 }
-
-                // --- DYNAMIC OUTER BACKGROUND LOGIC ---
                 const level = Math.floor(this.score / 100);
                 if (level > 0) {
                     const idx = (level - 1) % PASTEL_COLORS.length;
                     const hex = PASTEL_COLORS[idx];
                     this.targetRGB = this.hexToRgb(hex);
                 } else {
-                    this.targetRGB = [240, 242, 245]; // Default
+                    this.targetRGB = [240, 242, 245]; 
                 }
             }
 
@@ -671,48 +716,42 @@
                 let rowsCleared = 0;
                 let colsCleared = 0;
 
-                // Horizontal
                 for (let y = 0; y < GRID_SIZE; y++) {
                     const row = this.grid[y];
                     if (row.every(cell => cell !== null)) {
                         let matchLen = 1;
-                        let rowHasMatch = false;
                         for (let x = 1; x <= GRID_SIZE; x++) {
                             let prev = this.grid[y][x-1];
                             let curr = (x < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
-                                    rowHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x-1-k},${y}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        if(rowHasMatch) rowsCleared++;
+                        rowsCleared++;
                     }
                 }
 
-                // Vertical
                 for (let x = 0; x < GRID_SIZE; x++) {
                     let isColFull = true;
                     for(let y=0; y<GRID_SIZE; y++) if(this.grid[y][x] === null) { isColFull = false; break; }
                     if (isColFull) {
                         let matchLen = 1;
-                        let colHasMatch = false;
                         for (let y = 1; y <= GRID_SIZE; y++) {
                             let prev = this.grid[y-1][x];
                             let curr = (y < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
-                                    colHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x},${y-1-k}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        if(colHasMatch) colsCleared++;
+                        colsCleared++;
                     }
                 }
 
@@ -830,7 +869,6 @@
             }
 
             draw() {
-                // Background Color Interpolation & Application to Outer Body
                 this.bgRGB[0] += (this.targetRGB[0] - this.bgRGB[0]) * 0.02;
                 this.bgRGB[1] += (this.targetRGB[1] - this.bgRGB[1]) * 0.02;
                 this.bgRGB[2] += (this.targetRGB[2] - this.bgRGB[2]) * 0.02;
@@ -838,7 +876,6 @@
                 document.documentElement.style.setProperty('--bg-color', newColor);
                 
                 this.ctx.save();
-                // Clear canvas so its static CSS background shows through
                 this.ctx.clearRect(0, 0, this.width, this.height);
 
                 if(this.shake > 0) {
@@ -916,7 +953,6 @@
 
                 if (!this.isDying) {
                     for (let piece of this.dockPieces) {
-                        // Animate Scale
                         if(!piece.isDragging && piece.scale < piece.targetScale) {
                             piece.scale += 0.05;
                             if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
@@ -926,8 +962,17 @@
                         if(scale <= 0) continue;
 
                         let offsetY = piece.isDragging ? -70 : 0;
-                        let drawX = piece.isDragging ? this.input.x - (this.cellSize/2) : piece.x;
-                        let drawY = piece.isDragging ? this.input.y - (this.cellSize/2) + offsetY : piece.y;
+                        let drawX = piece.x;
+                        let drawY = piece.y;
+
+                        if (piece.isDragging) {
+                            drawX = this.input.x - (this.cellSize/2);
+                            drawY = this.input.y - (this.cellSize/2) + offsetY;
+                            if (isNaN(drawX) || isNaN(drawY)) {
+                                drawX = piece.x;
+                                drawY = piece.y;
+                            }
+                        }
 
                         if (piece.isDragging) {
                             this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -973,6 +1018,8 @@
             }
 
             drawRoundedRect(x, y, size, color, isFilled, isShadow=false, isFlash=false) {
+                if (isNaN(x) || isNaN(y) || isNaN(size)) return;
+
                 if(isFlash) {
                     this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
                     let s = size;
@@ -1001,28 +1048,46 @@
                 this.ctx.fill();
             }
 
-            getSnapCoordinates(piece) {
-                let fingerY = this.input.y - 70; 
-                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
-                let relY = fingerY - this.boardTop - (this.cellSize/2);
-                let gridX = Math.round(relX / this.cellSize);
-                let gridY = Math.round(relY / this.cellSize);
-                return { gridX, gridY };
+            setPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                let cx = 0, cy = 0;
+                
+                if (e.changedTouches && e.changedTouches.length > 0) {
+                    cx = e.changedTouches[0].clientX;
+                    cy = e.changedTouches[0].clientY;
+                } else if (e.touches && e.touches.length > 0) {
+                    cx = e.touches[0].clientX;
+                    cy = e.touches[0].clientY;
+                } else if (typeof e.clientX !== 'undefined') {
+                    cx = e.clientX;
+                    cy = e.clientY;
+                }
+
+                if(rect.width > 0 && rect.height > 0) {
+                    this.input.x = (cx - rect.left) * (this.width / rect.width);
+                    this.input.y = (cy - rect.top) * (this.height / rect.height);
+                }
             }
 
             onDown(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
                 e.preventDefault();
-                if(this.isAnimating || this.isDying) return; 
+                
+                if (this.state !== 'PLAY') return;
+                if(this.isAnimating || this.isDying || this.isSpawning) return;
+
                 this.setPos(e);
                 this.input.isDown = true;
                 
                 let closestDist = Infinity;
                 let closestPiece = null;
+                
                 for (let piece of this.dockPieces) {
                     let dx = this.input.x - piece.slotX;
                     let dy = this.input.y - piece.slotY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < this.cellSize * 4 && dist < closestDist) {
+                    if (dist < this.cellSize * 1.5 && dist < closestDist) {
                         closestDist = dist;
                         closestPiece = piece;
                     }
@@ -1035,13 +1100,16 @@
             }
 
             onMove(e) {
-                e.preventDefault();
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 if (!this.input.isDown) return;
+                
+                e.preventDefault();
                 this.setPos(e);
             }
 
             onUp(e) {
-                e.preventDefault();
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
@@ -1056,19 +1124,12 @@
                 }
             }
 
-            setPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                this.input.x = (clientX - rect.left) * (this.width / rect.width);
-                this.input.y = (clientY - rect.top) * (this.height / rect.height);
-            }
-
             setupInput() {
-                this.canvas.addEventListener('mousedown', e => this.onDown(e));
+                window.addEventListener('mousedown', e => this.onDown(e));
                 window.addEventListener('mousemove', e => this.onMove(e));
                 window.addEventListener('mouseup', e => this.onUp(e));
-                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
+                
+                window.addEventListener('touchstart', e => this.onDown(e), {passive: false});
                 window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
                 window.addEventListener('touchend', e => this.onUp(e), {passive: false});
             }
