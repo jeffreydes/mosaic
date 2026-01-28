@@ -36,39 +36,55 @@
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
-            transition: background-color 0.2s linear;
+            transition: background-color 0.1s linear;
         }
 
+        /* --- UI LAYERS --- */
         .ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             z-index: 20;
         }
 
         .active-layer { pointer-events: auto; }
         .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
-        /* SCREENS */
+        /* --- SCREENS --- */
         #start-screen { background: var(--accent); z-index: 300; }
         #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); }
         #death-screen { background: var(--accent); z-index: 250; }
 
+        /* --- MENU CONTAINERS --- */
         .menu-container {
             padding: 40px 50px;
             border-radius: 30px;
             text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.15);
-            max-width: 95%; max-height: 98vh;
-            overflow-y: auto; overflow-x: hidden;
+            max-width: 95%;
+            max-height: 98vh;
+            overflow-y: auto;
+            overflow-x: hidden;
             box-sizing: border-box;
         }
 
         .start-container {
-            padding: 40px; text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 30px;
-            width: 100%; pointer-events: auto;
+            padding: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            pointer-events: auto;
         }
 
         .big-logo {
@@ -86,19 +102,35 @@
             padding: 20px 30px; color: white; font-size: 24px; 
             border-radius: 60px; outline: none; width: 300px; 
             text-align: center; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; transition: 0.3s;
-            pointer-events: auto; user-select: text !important; -webkit-user-select: text !important;
+            text-transform: uppercase;
+            transition: 0.3s;
+            pointer-events: auto;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            touch-action: pan-x pan-y;
             z-index: 301; 
         }
+        #username-input::placeholder { color: rgba(255,255,255,0.6); }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
-        /* LEADERBOARD */
+        .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .logo-block {
+            width: 45px; height: 45px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 900; font-size: 1.6rem;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        /* Leaderboard */
         .online-lb { 
             width: 100%; min-width: 360px; max-width: 500px;
             background: rgba(0,0,0,0.04); 
             border-radius: 24px; padding: 30px; 
             border: 2px solid rgba(0,0,0,0.05); 
-            margin-bottom: 10px; box-sizing: border-box;
+            margin-bottom: 10px;
+            box-sizing: border-box;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
         
@@ -139,7 +171,7 @@
         .btn-accent { background: var(--accent); color: white; } 
         .btn-white { background: white; color: var(--accent); }
 
-        /* GAME UI */
+        /* Game UI */
         .header {
             position: absolute; top: 30px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
@@ -170,7 +202,8 @@
             border-radius: 50%; cursor: pointer;
             box-shadow: 0 12px 30px rgba(0,0,0,0.15);
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s, opacity 0.3s; color: var(--text-color);
+            transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
+            color: var(--text-color);
             pointer-events: auto;
         }
         .icon-btn:active { transform: scale(0.9); }
@@ -220,16 +253,6 @@
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
             #username-input { width: 240px; font-size: 20px; }
         }
-        
-        .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .logo-block {
-            width: 45px; height: 45px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 900; font-size: 1.6rem;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     </style>
 </head>
 <body>
@@ -309,7 +332,7 @@
     </div>
 
     <script>
-        // --- CONFIG ---
+        // --- CONFIG & LEADERBOARD ---
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -398,12 +421,15 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- INSTALL POPUP ---
+        // --- INSTALL POPUP LOGIC ---
         let deferredPrompt;
         window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const hasDismissed = localStorage.getItem('installPromptDismissed');
-            if (!isStandalone && !hasDismissed) setTimeout(showInstallPromotion, 2000);
+            
+            if (!isStandalone && !hasDismissed) {
+                setTimeout(showInstallPromotion, 2000);
+            }
         });
 
         function showInstallPromotion() {
@@ -429,7 +455,9 @@
         document.getElementById('android-install-btn').addEventListener('click', () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => closeInstallModal());
+                deferredPrompt.userChoice.then(() => {
+                    closeInstallModal();
+                });
             }
         });
 
@@ -440,7 +468,7 @@
             localStorage.setItem('installPromptDismissed', 'true');
         };
 
-        // --- NAVIGATION ---
+        // --- SCREEN NAVIGATION ---
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
             const val = input.value.trim();
@@ -560,11 +588,15 @@
                 this.isDying = false;
                 this.isSpawning = false;
                 this.history = null;
+                
                 this.targetRGB = [240, 242, 245];
+                
                 this.undoUsed = false;
                 this.ui.undoBtn.classList.add('disabled'); 
+                
                 this.ui.gameOver.classList.add('hidden');
                 this.ui.gameOver.classList.remove('active-layer');
+                
                 this.updateScore(0);
                 this.spawnPieces();
             }
@@ -613,7 +645,12 @@
             saveState() {
                 if (!this.undoUsed) {
                     const deepPieces = this.dockPieces.map(p => ({...p})); 
-                    deepPieces.forEach(p => { p.x = p.baseX; p.y = p.baseY; p.isDragging = false; });
+                    deepPieces.forEach(p => {
+                        p.x = p.baseX;
+                        p.y = p.baseY;
+                        p.isDragging = false;
+                    });
+
                     this.history = {
                         grid: JSON.parse(JSON.stringify(this.grid)),
                         score: this.score,
@@ -626,13 +663,17 @@
 
             performUndo() {
                 if(!this.history) return;
+                
                 this.grid = JSON.parse(JSON.stringify(this.history.grid));
                 this.score = this.history.score;
                 this.dockPieces = this.history.dockPieces.map(p => ({...p})); 
                 this.targetRGB = this.history.targetRGB;
+                
                 this.dragPiece = null;
                 this.input.isDown = false;
+                
                 this.updateScore(0);
+                
                 this.undoUsed = true;
                 this.ui.undoBtn.classList.add('disabled');
                 this.history = null; 
@@ -646,6 +687,7 @@
                     void this.ui.scoreBox.offsetWidth; 
                     this.ui.scoreBox.classList.add('score-pop');
                 }
+
                 const level = Math.floor(this.score / 100);
                 if (level > 0) {
                     const idx = (level - 1) % PASTEL_COLORS.length;
@@ -708,42 +750,48 @@
                 let rowsCleared = 0;
                 let colsCleared = 0;
 
+                // Horizontal
                 for (let y = 0; y < GRID_SIZE; y++) {
                     const row = this.grid[y];
                     if (row.every(cell => cell !== null)) {
                         let matchLen = 1;
+                        let rowHasMatch = false;
                         for (let x = 1; x <= GRID_SIZE; x++) {
                             let prev = this.grid[y][x-1];
                             let curr = (x < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
+                                    rowHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x-1-k},${y}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        rowsCleared++;
+                        if(rowHasMatch) rowsCleared++;
                     }
                 }
 
+                // Vertical
                 for (let x = 0; x < GRID_SIZE; x++) {
                     let isColFull = true;
                     for(let y=0; y<GRID_SIZE; y++) if(this.grid[y][x] === null) { isColFull = false; break; }
                     if (isColFull) {
                         let matchLen = 1;
+                        let colHasMatch = false;
                         for (let y = 1; y <= GRID_SIZE; y++) {
                             let prev = this.grid[y-1][x];
                             let curr = (y < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
+                                    colHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x},${y-1-k}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        colsCleared++;
+                        if(colHasMatch) colsCleared++;
                     }
                 }
 
@@ -955,8 +1003,23 @@
                         if(scale <= 0) continue;
 
                         let offsetY = piece.isDragging ? -70 : 0;
-                        let drawX = piece.isDragging ? this.input.x - (this.cellSize/2) : piece.x;
-                        let drawY = piece.isDragging ? this.input.y - (this.cellSize/2) + offsetY : piece.y;
+                        
+                        // Default position (dock)
+                        let drawX = piece.x;
+                        let drawY = piece.y;
+
+                        // Override if dragging
+                        if (piece.isDragging) {
+                            drawX = this.input.x - (this.cellSize/2);
+                            drawY = this.input.y - (this.cellSize/2) + offsetY;
+                            
+                            // Safety Check for NaN coordinates which causes "Vanishing Block" bug
+                            if (isNaN(drawX) || isNaN(drawY)) {
+                                // Reset to dock position if input is invalid
+                                drawX = piece.x;
+                                drawY = piece.y;
+                            }
+                        }
 
                         if (piece.isDragging) {
                             this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -1002,6 +1065,9 @@
             }
 
             drawRoundedRect(x, y, size, color, isFilled, isShadow=false, isFlash=false) {
+                // Safety check to prevent crashing the renderer
+                if (isNaN(x) || isNaN(y) || isNaN(size)) return;
+
                 if(isFlash) {
                     this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
                     let s = size;
@@ -1032,29 +1098,28 @@
 
             setPos(e) {
                 const rect = this.canvas.getBoundingClientRect();
-                let cx, cy;
+                let cx = 0, cy = 0;
                 
-                // Unified touch/mouse handling
-                if (e.touches && e.touches.length > 0) {
-                    cx = e.touches[0].clientX;
-                    cy = e.touches[0].clientY;
-                } else if (e.changedTouches && e.changedTouches.length > 0) {
+                if (e.changedTouches && e.changedTouches.length > 0) {
                     cx = e.changedTouches[0].clientX;
                     cy = e.changedTouches[0].clientY;
-                } else {
+                } else if (e.touches && e.touches.length > 0) {
+                    cx = e.touches[0].clientX;
+                    cy = e.touches[0].clientY;
+                } else if (typeof e.clientX !== 'undefined') {
                     cx = e.clientX;
                     cy = e.clientY;
                 }
 
-                this.input.x = (cx - rect.left) * (this.width / rect.width);
-                this.input.y = (cy - rect.top) * (this.height / rect.height);
+                if(rect.width > 0 && rect.height > 0) {
+                    this.input.x = (cx - rect.left) * (this.width / rect.width);
+                    this.input.y = (cy - rect.top) * (this.height / rect.height);
+                }
             }
 
             onDown(e) {
-                // Allow interactions with inputs/buttons
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 
-                // Prevent browser behaviors (scrolling/zoom) only on canvas interaction
                 e.preventDefault();
                 
                 if (this.state !== 'PLAY') return;
@@ -1071,7 +1136,7 @@
                     let dy = this.input.y - piece.slotY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
                     
-                    // Reduced grab radius to 1.5x cell size to prevent accidental grabs
+                    // Reduced grab radius (1.5x) to prevent accidental multisnapping
                     if (dist < this.cellSize * 1.5 && dist < closestDist) {
                         closestDist = dist;
                         closestPiece = piece;
@@ -1085,7 +1150,7 @@
             }
 
             onMove(e) {
-                // On Move/Drag, we generally want to track the finger even if it slides over buttons
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 if (!this.input.isDown) return;
                 
                 e.preventDefault();
@@ -1093,7 +1158,8 @@
             }
 
             onUp(e) {
-                // Always release drag on up
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
