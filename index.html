@@ -220,6 +220,7 @@
         .ios-instruction { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; color: #333; margin: 10px 0; }
         .close-link { display: block; margin-top: 15px; color: #999; font-size: 14px; text-decoration: none; cursor: pointer; }
 
+        /* Canvas */
         canvas {
             background: white; border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
@@ -321,6 +322,7 @@
     </div>
 
     <script>
+        // --- CONFIG & LEADERBOARD ---
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -409,12 +411,15 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- INSTALL POPUP ---
+        // --- INSTALL POPUP LOGIC ---
         let deferredPrompt;
         window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const hasDismissed = localStorage.getItem('installPromptDismissed');
-            if (!isStandalone && !hasDismissed) setTimeout(showInstallPromotion, 2000);
+            
+            if (!isStandalone && !hasDismissed) {
+                setTimeout(showInstallPromotion, 2000);
+            }
         });
 
         function showInstallPromotion() {
@@ -440,7 +445,9 @@
         document.getElementById('android-install-btn').addEventListener('click', () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => closeInstallModal());
+                deferredPrompt.userChoice.then(() => {
+                    closeInstallModal();
+                });
             }
         });
 
@@ -451,6 +458,7 @@
             localStorage.setItem('installPromptDismissed', 'true');
         };
 
+        // --- SCREEN NAVIGATION ---
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
             const val = input.value.trim();
@@ -463,6 +471,7 @@
             document.getElementById('main-menu').classList.add('active-layer');
         };
 
+        // --- GAME LOGIC ---
         const GRID_SIZE = 9; 
         const MIN_MATCH = 4; 
         const COLORS = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd', '#ff9ff3', '#48dbfb'];
@@ -492,6 +501,7 @@
                     undoBtn: document.getElementById('undoBtn')
                 };
 
+                // State
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
                 this.dockPieces = [];
                 this.particles = [];
@@ -509,6 +519,7 @@
                 this.flashAlpha = 0;
                 this.undoUsed = false;
                 
+                // Bg color state
                 this.bgRGB = [240, 242, 245]; 
                 this.targetRGB = [240, 242, 245];
 
@@ -621,7 +632,12 @@
             saveState() {
                 if (!this.undoUsed) {
                     const deepPieces = this.dockPieces.map(p => ({...p})); 
-                    deepPieces.forEach(p => { p.x = p.baseX; p.y = p.baseY; p.isDragging = false; });
+                    deepPieces.forEach(p => {
+                        p.x = p.baseX;
+                        p.y = p.baseY;
+                        p.isDragging = false;
+                    });
+
                     this.history = {
                         grid: JSON.parse(JSON.stringify(this.grid)),
                         score: this.score,
@@ -654,6 +670,7 @@
                     void this.ui.scoreBox.offsetWidth; 
                     this.ui.scoreBox.classList.add('score-pop');
                 }
+
                 const level = Math.floor(this.score / 100);
                 if (level > 0) {
                     const idx = (level - 1) % PASTEL_COLORS.length;
@@ -953,6 +970,7 @@
 
                 if (!this.isDying) {
                     for (let piece of this.dockPieces) {
+                        // Animate Scale
                         if(!piece.isDragging && piece.scale < piece.targetScale) {
                             piece.scale += 0.05;
                             if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
@@ -1070,8 +1088,10 @@
             }
 
             onDown(e) {
+                // Allow interactions with inputs/buttons
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 
+                // Prevent browser default actions (scrolling, zooming) on the canvas
                 e.preventDefault();
                 
                 if (this.state !== 'PLAY') return;
@@ -1087,6 +1107,8 @@
                     let dx = this.input.x - piece.slotX;
                     let dy = this.input.y - piece.slotY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    // Reduced grab radius (1.5x) to prevent accidental multisnapping
                     if (dist < this.cellSize * 1.5 && dist < closestDist) {
                         closestDist = dist;
                         closestPiece = piece;
@@ -1100,7 +1122,7 @@
             }
 
             onMove(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                // On Move/Drag, we generally want to track the finger even if it slides over buttons
                 if (!this.input.isDown) return;
                 
                 e.preventDefault();
@@ -1108,8 +1130,7 @@
             }
 
             onUp(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
+                // Always release drag on up
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
@@ -1125,11 +1146,14 @@
             }
 
             setupInput() {
-                window.addEventListener('mousedown', e => this.onDown(e));
+                // Mouse
+                // IMPORTANT: Listen on canvas to isolate game touch from UI touch
+                this.canvas.addEventListener('mousedown', e => this.onDown(e));
                 window.addEventListener('mousemove', e => this.onMove(e));
                 window.addEventListener('mouseup', e => this.onUp(e));
                 
-                window.addEventListener('touchstart', e => this.onDown(e), {passive: false});
+                // Touch
+                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
                 window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
                 window.addEventListener('touchend', e => this.onUp(e), {passive: false});
             }
