@@ -75,6 +75,7 @@
             padding: 40px; text-align: center;
             display: flex; flex-direction: column; align-items: center; gap: 30px;
             width: 100%;
+            pointer-events: auto; /* Allow interaction */
         }
 
         .big-logo {
@@ -97,8 +98,8 @@
             
             /* Enable Interaction */
             pointer-events: auto;
-            user-select: text; 
-            -webkit-user-select: text;
+            user-select: text !important; 
+            -webkit-user-select: text !important;
             z-index: 1000;
         }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
@@ -579,11 +580,15 @@
                 this.isDying = false;
                 this.isSpawning = false;
                 this.history = null;
+                
                 this.targetRGB = [240, 242, 245];
+                
                 this.undoUsed = false;
                 this.ui.undoBtn.classList.add('disabled'); 
+                
                 this.ui.gameOver.classList.add('hidden');
                 this.ui.gameOver.classList.remove('active-layer');
+                
                 this.updateScore(0);
                 this.spawnPieces();
             }
@@ -650,13 +655,17 @@
 
             performUndo() {
                 if(!this.history) return;
+                
                 this.grid = JSON.parse(JSON.stringify(this.history.grid));
                 this.score = this.history.score;
                 this.dockPieces = this.history.dockPieces.map(p => ({...p})); 
                 this.targetRGB = this.history.targetRGB;
+                
                 this.dragPiece = null;
                 this.input.isDown = false;
+                
                 this.updateScore(0);
+                
                 this.undoUsed = true;
                 this.ui.undoBtn.classList.add('disabled');
                 this.history = null; 
@@ -733,42 +742,48 @@
                 let rowsCleared = 0;
                 let colsCleared = 0;
 
+                // Horizontal
                 for (let y = 0; y < GRID_SIZE; y++) {
                     const row = this.grid[y];
                     if (row.every(cell => cell !== null)) {
                         let matchLen = 1;
+                        let rowHasMatch = false;
                         for (let x = 1; x <= GRID_SIZE; x++) {
                             let prev = this.grid[y][x-1];
                             let curr = (x < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
+                                    rowHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x-1-k},${y}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        rowsCleared++;
+                        if(rowHasMatch) rowsCleared++;
                     }
                 }
 
+                // Vertical
                 for (let x = 0; x < GRID_SIZE; x++) {
                     let isColFull = true;
                     for(let y=0; y<GRID_SIZE; y++) if(this.grid[y][x] === null) { isColFull = false; break; }
                     if (isColFull) {
                         let matchLen = 1;
+                        let colHasMatch = false;
                         for (let y = 1; y <= GRID_SIZE; y++) {
                             let prev = this.grid[y-1][x];
                             let curr = (y < GRID_SIZE) ? this.grid[y][x] : null;
                             if (prev && curr === prev) matchLen++;
                             else {
                                 if (matchLen >= MIN_MATCH) {
+                                    colHasMatch = true;
                                     for (let k = 0; k < matchLen; k++) cellsToClear.add(`${x},${y-1-k}`);
                                 }
                                 matchLen = 1;
                             }
                         }
-                        colsCleared++;
+                        if(colHasMatch) colsCleared++;
                     }
                 }
 
@@ -970,7 +985,6 @@
 
                 if (!this.isDying) {
                     for (let piece of this.dockPieces) {
-                        // Animate Scale
                         if(!piece.isDragging && piece.scale < piece.targetScale) {
                             piece.scale += 0.05;
                             if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
@@ -1066,6 +1080,17 @@
                 this.ctx.fill();
             }
 
+            // --- RE-INSERTED FUNCTION ---
+            getSnapCoordinates(piece) {
+                let fingerY = this.input.y - 70; 
+                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
+                let relY = fingerY - this.boardTop - (this.cellSize/2);
+                let gridX = Math.round(relX / this.cellSize);
+                let gridY = Math.round(relY / this.cellSize);
+                return { gridX, gridY };
+            }
+            // ---------------------------
+
             setPos(e) {
                 const rect = this.canvas.getBoundingClientRect();
                 let cx = 0, cy = 0;
@@ -1088,10 +1113,8 @@
             }
 
             onDown(e) {
-                // Allow interactions with inputs/buttons
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 
-                // Prevent browser default actions (scrolling, zooming) on the canvas
                 e.preventDefault();
                 
                 if (this.state !== 'PLAY') return;
@@ -1108,7 +1131,6 @@
                     let dy = this.input.y - piece.slotY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
                     
-                    // Reduced grab radius (1.5x) to prevent accidental multisnapping
                     if (dist < this.cellSize * 1.5 && dist < closestDist) {
                         closestDist = dist;
                         closestPiece = piece;
@@ -1122,7 +1144,7 @@
             }
 
             onMove(e) {
-                // On Move/Drag, we generally want to track the finger even if it slides over buttons
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 if (!this.input.isDown) return;
                 
                 e.preventDefault();
@@ -1130,7 +1152,8 @@
             }
 
             onUp(e) {
-                // Always release drag on up
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
@@ -1146,13 +1169,11 @@
             }
 
             setupInput() {
-                // Mouse
-                // IMPORTANT: Listen on canvas to isolate game touch from UI touch
+                // Listen on canvas to isolate game touch from UI touch
                 this.canvas.addEventListener('mousedown', e => this.onDown(e));
                 window.addEventListener('mousemove', e => this.onMove(e));
                 window.addEventListener('mouseup', e => this.onUp(e));
                 
-                // Touch
                 this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
                 window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
                 window.addEventListener('touchend', e => this.onUp(e), {passive: false});
