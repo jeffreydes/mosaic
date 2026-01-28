@@ -32,16 +32,15 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* Cruciaal voor mobiel scroll blokkeren */
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
-            transition: background-color 0.1s linear;
+            transition: background-color 0.2s linear;
         }
 
         .ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 20;
@@ -111,6 +110,7 @@
             margin-bottom: 10px; box-sizing: border-box;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
+        
         .lb-header { 
             text-align: center; font-size: 18px; letter-spacing: 3px; 
             font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase;
@@ -168,11 +168,10 @@
         }
         .score-pop { transform: scale(1.3); color: var(--accent); }
 
-        /* FIXED CONTAINER: No Pointer Events on container, Auto on button */
         .controls-container {
             position: absolute; bottom: 40px;
             display: flex; justify-content: center; width: 100%;
-            pointer-events: none; /* KEY FIX: Let clicks pass through empty space */
+            pointer-events: none; /* UI container klikt door */
             z-index: 100;
         }
         .icon-btn {
@@ -182,37 +181,18 @@
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
             color: var(--text-color);
-            pointer-events: auto; /* Button catches clicks */
+            pointer-events: auto; /* Buttons klikken wel */
         }
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
         .spin { animation: spin 0.5s ease-out; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #install-modal {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: flex-end; justify-content: center;
-            background: rgba(0,0,0,0.4); z-index: 500; pointer-events: auto;
-            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.5s;
-        }
-        .install-card {
-            background: white; width: 90%; max-width: 400px;
-            border-radius: 24px; padding: 30px; margin-bottom: 30px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: translateY(100px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #install-modal.active { opacity: 1; }
-        #install-modal.active .install-card { transform: translateY(0); }
-        .install-title { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
-        .install-text { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
-        .ios-instruction { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; color: #333; margin: 10px 0; }
-        .close-link { display: block; margin-top: 15px; color: #999; font-size: 14px; text-decoration: none; cursor: pointer; }
-
         canvas {
             background: white; border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
             cursor: grab; max-width: 95vw;
-            touch-action: none;
+            touch-action: none; /* ESSENTIAL */
         }
         canvas:active { cursor: grabbing; }
 
@@ -294,21 +274,8 @@
         </div>
     </div>
 
-    <div id="install-modal" class="hidden">
-        <div class="install-card">
-            <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
-            <div class="install-title">Install App</div>
-            <div class="install-text" id="install-desc">Add Mosaic Fit to your home screen for the full screen experience.</div>
-            <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem;">Install Now</button>
-            <div id="ios-install-hint" style="display:none;">
-                <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
-                <div class="ios-instruction">2. Select "Add to Home Screen"</div>
-            </div>
-            <a class="close-link" onclick="closeInstallModal()">Not Now</a>
-        </div>
-    </div>
-
     <script>
+        // --- CONFIG ---
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -397,48 +364,7 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // --- INSTALL POPUP ---
-        let deferredPrompt;
-        window.addEventListener('load', () => {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            const hasDismissed = localStorage.getItem('installPromptDismissed');
-            if (!isStandalone && !hasDismissed) setTimeout(showInstallPromotion, 2000);
-        });
-
-        function showInstallPromotion() {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            const isIOS = /iphone|ipad|ipod/.test(userAgent);
-            const modal = document.getElementById('install-modal');
-
-            if (isIOS) {
-                document.getElementById('ios-install-hint').style.display = 'block';
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.add('active'), 10);
-            } else {
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    document.getElementById('android-install-btn').style.display = 'inline-block';
-                    modal.classList.remove('hidden');
-                    setTimeout(() => modal.classList.add('active'), 10);
-                });
-            }
-        }
-
-        document.getElementById('android-install-btn').addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => closeInstallModal());
-            }
-        });
-
-        window.closeInstallModal = () => {
-            const modal = document.getElementById('install-modal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 500);
-            localStorage.setItem('installPromptDismissed', 'true');
-        };
-
+        // --- NAVIGATION ---
         window.enterMainMenu = () => {
             const input = document.getElementById('username-input');
             const val = input.value.trim();
@@ -490,6 +416,11 @@
                 this.history = null; 
                 this.score = 0;
                 this.dragPiece = null;
+                
+                // DRAG VARIABLES
+                this.dragOffset = {x: 0, y: 0};
+                this.pointer = {x: 0, y: 0, isDown: false};
+
                 this.isAnimating = false;
                 this.isSpawning = false;
                 this.isDying = false; 
@@ -502,7 +433,7 @@
 
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
-                this.input = { x: 0, y: 0, isDown: false };
+                
                 this.setupInput();
 
                 document.getElementById('startBtn').addEventListener('click', () => this.startGame());
@@ -534,6 +465,128 @@
 
                 this.boardTop = 30;
                 this.boardLeft = 20;
+            }
+
+            // --- RE-WRITTEN INPUT HANDLING ---
+
+            setupInput() {
+                // Attach listeners to CANVAS to allow UI elements to work
+                this.canvas.addEventListener('mousedown', e => this.handleStart(e));
+                this.canvas.addEventListener('touchstart', e => this.handleStart(e), {passive: false});
+
+                // Attach Move/End to window to catch drags outside canvas
+                window.addEventListener('mousemove', e => this.handleMove(e));
+                window.addEventListener('touchmove', e => this.handleMove(e), {passive: false});
+                
+                window.addEventListener('mouseup', e => this.handleEnd(e));
+                window.addEventListener('touchend', e => this.handleEnd(e));
+            }
+
+            getPos(e) {
+                // Normalize touch/mouse
+                const evt = e.touches && e.touches.length > 0 ? e.touches[0] : e;
+                const rect = this.canvas.getBoundingClientRect();
+                
+                // Account for CSS scaling
+                const scaleX = this.canvas.width / 2 / rect.width; 
+                const scaleY = this.canvas.height / 2 / rect.height;
+
+                return {
+                    x: (evt.clientX - rect.left) * scaleX,
+                    y: (evt.clientY - rect.top) * scaleY
+                };
+            }
+
+            handleStart(e) {
+                if (this.state !== 'PLAY' || this.isAnimating || this.isDying || this.isSpawning) return;
+                
+                // Prevent scrolling ONLY when touching canvas
+                if (e.cancelable) e.preventDefault();
+                
+                const pos = this.getPos(e);
+                this.pointer.x = pos.x;
+                this.pointer.y = pos.y;
+                this.pointer.isDown = true;
+
+                // Find closest piece
+                let bestPiece = null;
+                // Generous hit detection (Box distance)
+                const hitRadius = this.cellSize * 2.5; 
+
+                for (let piece of this.dockPieces) {
+                    const dx = Math.abs(pos.x - (piece.x + (piece.w/2))); // Dist to center of piece
+                    const dy = Math.abs(pos.y - (piece.y + (piece.h/2)));
+
+                    if (dx < hitRadius && dy < hitRadius) {
+                        bestPiece = piece;
+                    }
+                }
+
+                if (bestPiece) {
+                    this.dragPiece = bestPiece;
+                    bestPiece.isDragging = true;
+                    // Calculate visual offset so it doesn't snap to center
+                    this.dragOffset.x = piece.x - pos.x;
+                    this.dragOffset.y = piece.y - pos.y;
+                    
+                    // On Mobile, shift Y up so finger doesn't cover block
+                    if (e.touches) {
+                        this.dragOffset.y -= 80; 
+                    }
+                }
+            }
+
+            handleMove(e) {
+                if (!this.pointer.isDown || !this.dragPiece) return;
+                if (e.cancelable) e.preventDefault();
+
+                const pos = this.getPos(e);
+                this.pointer.x = pos.x;
+                this.pointer.y = pos.y;
+
+                // Move piece
+                this.dragPiece.x = pos.x + this.dragOffset.x;
+                this.dragPiece.y = pos.y + this.dragOffset.y;
+            }
+
+            handleEnd(e) {
+                if (!this.pointer.isDown) return;
+                this.pointer.isDown = false;
+
+                if (this.dragPiece) {
+                    const snap = this.getSnapCoordinates(this.dragPiece);
+                    if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                        this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
+                    } else {
+                        // Return to dock
+                        this.dragPiece.isDragging = false;
+                        this.animateReturn(this.dragPiece);
+                    }
+                    this.dragPiece = null;
+                }
+            }
+
+            animateReturn(piece) {
+                // Simple lerp animation back to base
+                const startX = piece.x;
+                const startY = piece.y;
+                const endX = piece.baseX;
+                const endY = piece.baseY;
+                let t = 0;
+                
+                const anim = () => {
+                    t += 0.15;
+                    if(t > 1) {
+                        piece.x = endX;
+                        piece.y = endY;
+                        return;
+                    }
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    piece.x = startX + (endX - startX) * ease;
+                    piece.y = startY + (endY - startY) * ease;
+                    requestAnimationFrame(anim);
+                };
+                anim();
             }
 
             startGame() {
@@ -586,12 +639,15 @@
                         const shapeW = (maxX - minX + 1) * this.cellSize;
                         const shapeH = (maxY - minY + 1) * this.cellSize;
                         const slotCenterX = (i * slotWidth) + (slotWidth / 2) + 15;
+                        
+                        // Calculate Base Position centered in slot
                         const basePos = { x: slotCenterX - (shapeW / 2), y: dockY - (shapeH / 2) };
 
                         this.dockPieces.push({
                             shape: shapeDef, color: color,
                             x: basePos.x, y: basePos.y,
                             baseX: basePos.x, baseY: basePos.y,
+                            w: shapeW, h: shapeH, // Store dimension for hit test
                             slotX: slotCenterX, slotY: dockY, 
                             scale: 0, targetScale: 0.55, isDragging: false 
                         });
@@ -627,7 +683,7 @@
                 this.dockPieces = this.history.dockPieces.map(p => ({...p})); 
                 this.targetRGB = this.history.targetRGB;
                 this.dragPiece = null;
-                this.input.isDown = false;
+                this.pointer.isDown = false;
                 this.updateScore(0);
                 this.undoUsed = true;
                 this.ui.undoBtn.classList.add('disabled');
@@ -666,22 +722,29 @@
 
             placePiece(piece, gridX, gridY) {
                 this.saveState();
-                let drawX = this.input.x - (this.cellSize/2);
-                let drawY = this.input.y - (this.cellSize/2) - 70;
+                
+                // Get the draw pos from the grid calculation to ensure perfect snap animation
+                const targetX = this.boardLeft + (gridX) * this.cellSize; // base of grid
+                const targetY = this.boardTop + (gridY) * this.cellSize;
+
                 this.isAnimating = true; 
                 let blockCount = piece.shape.length;
                 let blocksLanded = 0;
 
                 for (let i = 0; i < piece.shape.length; i++) {
                     const block = piece.shape[i];
-                    const targetX = this.boardLeft + (gridX + block[0]) * this.cellSize;
-                    const targetY = this.boardTop + (gridY + block[1]) * this.cellSize;
-                    const startX = drawX + (block[0] * this.cellSize);
-                    const startY = drawY + (block[1] * this.cellSize);
+                    
+                    // Destination on grid
+                    const dstX = this.boardLeft + (gridX + block[0]) * this.cellSize;
+                    const dstY = this.boardTop + (gridY + block[1]) * this.cellSize;
+                    
+                    // Current Position (dragging position)
+                    const startX = piece.x + (block[0] * this.cellSize);
+                    const startY = piece.y + (block[1] * this.cellSize);
 
                     setTimeout(() => {
                         this.placingBlocks.push({
-                            x: startX, y: startY, tx: targetX, ty: targetY, color: piece.color, progress: 0,
+                            x: startX, y: startY, tx: dstX, ty: dstY, color: piece.color, progress: 0,
                             gridX: gridX + block[0], gridY: gridY + block[1],
                             onFinish: () => {
                                 this.grid[gridY + block[1]][gridX + block[0]] = piece.color;
@@ -855,6 +918,15 @@
                 }
                 return true;
             }
+            
+            getSnapCoordinates(piece) {
+                // Calculate grid based on center of top-left block of the shape
+                let relX = piece.x - this.boardLeft;
+                let relY = piece.y - this.boardTop;
+                let gridX = Math.round(relX / this.cellSize);
+                let gridY = Math.round(relY / this.cellSize);
+                return { gridX, gridY };
+            }
 
             draw() {
                 this.bgRGB[0] += (this.targetRGB[0] - this.bgRGB[0]) * 0.02;
@@ -927,8 +999,26 @@
                 }
 
                 if (this.dragPiece && !this.isAnimating) {
+                    // Draw Drag Piece shadow
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                    for (let block of this.dragPiece.shape) {
+                        let bx = this.dragPiece.x + (block[0] * this.cellSize) + 15;
+                        let by = this.dragPiece.y + (block[1] * this.cellSize) + 25;
+                        this.drawRoundedRect(bx, by, this.cellSize, 'black', true, true);
+                    }
+                    this.ctx.globalAlpha = 1.0;
+
+                    // Draw Drag Piece
+                    for (let block of this.dragPiece.shape) {
+                        let bx = this.dragPiece.x + (block[0] * this.cellSize);
+                        let by = this.dragPiece.y + (block[1] * this.cellSize);
+                        this.drawRoundedRect(bx, by, this.cellSize, this.dragPiece.color, true);
+                    }
+                    
+                    // Snap Ghost
                     const snap = this.getSnapCoordinates(this.dragPiece);
-                    if (snap && this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                    if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
                         this.ctx.globalAlpha = 0.3;
                         for (let block of this.dragPiece.shape) {
                             let px = this.boardLeft + (snap.gridX + block[0]) * this.cellSize;
@@ -941,40 +1031,36 @@
 
                 if (!this.isDying) {
                     for (let piece of this.dockPieces) {
-                        if(!piece.isDragging && piece.scale < piece.targetScale) {
+                        if(piece.isDragging) continue;
+
+                        // Animate Scale
+                        if(piece.scale < piece.targetScale) {
                             piece.scale += 0.05;
                             if(piece.scale > piece.targetScale) piece.scale = piece.targetScale;
                         }
 
-                        let scale = piece.isDragging ? 1.0 : piece.scale;
+                        let scale = piece.scale;
                         if(scale <= 0) continue;
 
-                        let offsetY = piece.isDragging ? -70 : 0;
-                        let drawX = piece.x;
-                        let drawY = piece.y;
-
-                        if (piece.isDragging) {
-                            drawX = this.input.x - (this.cellSize/2);
-                            drawY = this.input.y - (this.cellSize/2) + offsetY;
-                            if (isNaN(drawX) || isNaN(drawY)) {
-                                drawX = piece.x;
-                                drawY = piece.y;
-                            }
-                        }
-
-                        if (piece.isDragging) {
-                            this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
-                            for (let block of piece.shape) {
-                                let bx = drawX + (block[0] * this.cellSize * scale) + 10;
-                                let by = drawY + (block[1] * this.cellSize * scale) + 20;
-                                this.drawRoundedRect(bx, by, this.cellSize * scale, 'black', true, true);
-                            }
-                        }
-
+                        // Draw centered in slot
+                        // piece.x is already top-left of shape if scaled 0.55
+                        // To scale smoothly from center, we need to adjust draw position
+                        let drawScale = scale;
+                        
+                        // We use the basePos which assumes 0.55.
+                        // If scale is different, we adjust offset to keep centered.
+                        let centerOffsetX = (piece.w * 0.55 - piece.w * drawScale) / 2; // Approximate center fix
+                        
+                        // Fallback to simple drawing for now to ensure robustness
                         for (let block of piece.shape) {
-                            let bx = drawX + (block[0] * this.cellSize * scale);
-                            let by = drawY + (block[1] * this.cellSize * scale);
-                            this.drawRoundedRect(bx, by, this.cellSize * scale, piece.color, true);
+                            let bx = piece.x + (block[0] * this.cellSize * 0.55); // Keep docked visual static scale
+                            let by = piece.y + (block[1] * this.cellSize * 0.55);
+                            
+                            // Simple spawn animation opacity/size
+                            let s = this.cellSize * 0.55 * (piece.scale / 0.55);
+                            let off = (this.cellSize * 0.55 - s)/2;
+                            
+                            this.drawRoundedRect(bx + off, by + off, s, piece.color, true);
                         }
                     }
                 }
@@ -1006,8 +1092,6 @@
             }
 
             drawRoundedRect(x, y, size, color, isFilled, isShadow=false, isFlash=false) {
-                if (isNaN(x) || isNaN(y) || isNaN(size)) return;
-
                 if(isFlash) {
                     this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
                     let s = size;
@@ -1034,106 +1118,6 @@
                 this.ctx.quadraticCurveTo(finalX, finalY, finalX + radius, finalY);
                 this.ctx.closePath();
                 this.ctx.fill();
-            }
-
-            getSnapCoordinates(piece) {
-                let fingerY = this.input.y - 70; 
-                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
-                let relY = fingerY - this.boardTop - (this.cellSize/2);
-                let gridX = Math.round(relX / this.cellSize);
-                let gridY = Math.round(relY / this.cellSize);
-                return { gridX, gridY };
-            }
-
-            setPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                let cx = 0, cy = 0;
-                
-                if (e.changedTouches && e.changedTouches.length > 0) {
-                    cx = e.changedTouches[0].clientX;
-                    cy = e.changedTouches[0].clientY;
-                } else if (e.touches && e.touches.length > 0) {
-                    cx = e.touches[0].clientX;
-                    cy = e.touches[0].clientY;
-                } else if (typeof e.clientX !== 'undefined') {
-                    cx = e.clientX;
-                    cy = e.clientY;
-                }
-
-                if(rect.width > 0 && rect.height > 0) {
-                    this.input.x = (cx - rect.left) * (this.width / rect.width);
-                    this.input.y = (cy - rect.top) * (this.height / rect.height);
-                }
-            }
-
-            onDown(e) {
-                // Allow interactions with inputs/buttons
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
-                e.preventDefault();
-                
-                if (this.state !== 'PLAY') return;
-                if(this.isAnimating || this.isDying || this.isSpawning) return;
-
-                this.setPos(e);
-                this.input.isDown = true;
-                
-                let closestDist = Infinity;
-                let closestPiece = null;
-                
-                // Using BOX detection for easier touches
-                for (let piece of this.dockPieces) {
-                    let dx = Math.abs(this.input.x - piece.slotX);
-                    let dy = Math.abs(this.input.y - piece.slotY);
-                    
-                    // Generous hit box (width/6 allows roughly slot width)
-                    if (dx < this.width / 6 && dy < this.dockHeight / 2) {
-                        closestPiece = piece;
-                        break; // Prioritize one
-                    }
-                }
-                
-                if (closestPiece) {
-                    this.dragPiece = closestPiece;
-                    closestPiece.isDragging = true;
-                }
-            }
-
-            onMove(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                if (!this.input.isDown) return;
-                
-                e.preventDefault();
-                this.setPos(e);
-            }
-
-            onUp(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
-                this.input.isDown = false;
-                if (this.dragPiece) {
-                    const snap = this.getSnapCoordinates(this.dragPiece);
-                    if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
-                        this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
-                    } else {
-                        this.dragPiece.x = this.dragPiece.baseX;
-                        this.dragPiece.y = this.dragPiece.baseY;
-                    }
-                    this.dragPiece.isDragging = false;
-                    this.dragPiece = null;
-                }
-            }
-
-            setupInput() {
-                // IMPORTANT: Listen on canvas to isolate game touch from UI touch
-                this.canvas.addEventListener('mousedown', e => this.onDown(e));
-                window.addEventListener('mousemove', e => this.onMove(e));
-                window.addEventListener('mouseup', e => this.onUp(e));
-                
-                // Canvas-specific touch events
-                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
-                window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
-                window.addEventListener('touchend', e => this.onUp(e), {passive: false});
             }
 
             loop() {
