@@ -32,7 +32,7 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            touch-action: none; /* Disables double-tap zoom */
+            touch-action: none;
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
@@ -51,7 +51,7 @@
             z-index: 20;
         }
 
-        .active-layer { pointer-events: auto; } /* Allow clicks on active layer */
+        .active-layer { pointer-events: auto; }
         .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
         /* --- SCREENS --- */
@@ -76,7 +76,6 @@
             box-sizing: border-box;
         }
 
-        /* Start Screen Specifics */
         .start-container {
             padding: 40px;
             text-align: center;
@@ -85,7 +84,7 @@
             align-items: center;
             gap: 30px;
             width: 100%;
-            pointer-events: auto; /* Ensure touches work here */
+            pointer-events: auto;
         }
 
         .big-logo {
@@ -105,18 +104,15 @@
             text-align: center; font-weight: 800; letter-spacing: 1px;
             text-transform: uppercase;
             transition: 0.3s;
-            
-            /* Critical Mobile Fixes */
             pointer-events: auto;
             user-select: text !important;
             -webkit-user-select: text !important;
-            touch-action: pan-x pan-y; /* Allow scrolling/interaction */
+            touch-action: pan-x pan-y;
             z-index: 301; 
         }
         #username-input::placeholder { color: rgba(255,255,255,0.6); }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
-        /* Main Menu Logo */
         .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .logo-block {
             width: 45px; height: 45px; border-radius: 12px;
@@ -169,7 +165,7 @@
             cursor: pointer; font-weight: 900; transition: transform 0.1s;
             box-shadow: 0 12px 30px rgba(0,0,0,0.2);
             text-transform: uppercase; letter-spacing: 1px;
-            pointer-events: auto; /* Fix clicks */
+            pointer-events: auto;
         }
         .btn:hover { transform: translateY(-3px); }
         .btn:active { transform: scale(0.96); }
@@ -209,7 +205,7 @@
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s, opacity 0.3s, filter 0.3s; 
             color: var(--text-color);
-            pointer-events: auto; /* Fix clicks */
+            pointer-events: auto;
         }
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
@@ -241,6 +237,7 @@
             background: white; border-radius: 20px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.08);
             cursor: grab; max-width: 95vw;
+            touch-action: none;
         }
         canvas:active { cursor: grabbing; }
 
@@ -266,7 +263,6 @@
         <div class="start-container">
             <div class="big-logo">M</div>
             <input type="text" id="username-input" placeholder="ENTER USERNAME" maxlength="12">
-            
             <button class="btn btn-white" style="margin-top: 25px; color: var(--accent);" onclick="enterMainMenu()">ENTER</button>
         </div>
     </div>
@@ -1084,28 +1080,44 @@
                 this.ctx.fill();
             }
 
-            getSnapCoordinates(piece) {
-                let fingerY = this.input.y - 70; 
-                let relX = this.input.x - this.boardLeft - (this.cellSize/2);
-                let relY = fingerY - this.boardTop - (this.cellSize/2);
-                let gridX = Math.round(relX / this.cellSize);
-                let gridY = Math.round(relY / this.cellSize);
-                return { gridX, gridY };
+            setPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                let cx, cy;
+                
+                // Unified touch/mouse handling
+                if (e.touches && e.touches.length > 0) {
+                    cx = e.touches[0].clientX;
+                    cy = e.touches[0].clientY;
+                } else if (e.changedTouches && e.changedTouches.length > 0) {
+                    cx = e.changedTouches[0].clientX;
+                    cy = e.changedTouches[0].clientY;
+                } else {
+                    cx = e.clientX;
+                    cy = e.clientY;
+                }
+
+                this.input.x = (cx - rect.left) * (this.width / rect.width);
+                this.input.y = (cy - rect.top) * (this.height / rect.height);
             }
 
             onDown(e) {
+                // Allow interaction with form elements
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 
-                // Only allow game interaction in PLAY state
-                if (this.state !== 'PLAY') return;
-
+                // Prevent browser default actions (scrolling, zooming) on the canvas
                 e.preventDefault();
-                if(this.isAnimating || this.isDying) return; 
+                
+                if (this.state !== 'PLAY') return;
+                
+                // Prevent interaction during critical animations
+                if(this.isAnimating || this.isDying || this.isSpawning) return;
+
                 this.setPos(e);
                 this.input.isDown = true;
                 
                 let closestDist = Infinity;
                 let closestPiece = null;
+                
                 for (let piece of this.dockPieces) {
                     let dx = this.input.x - piece.slotX;
                     let dy = this.input.y - piece.slotY;
@@ -1124,17 +1136,15 @@
 
             onMove(e) {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                if (this.state !== 'PLAY') return;
-
-                e.preventDefault();
                 if (!this.input.isDown) return;
+                
+                e.preventDefault();
                 this.setPos(e);
             }
 
             onUp(e) {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
                 
-                e.preventDefault();
                 this.input.isDown = false;
                 if (this.dragPiece) {
                     const snap = this.getSnapCoordinates(this.dragPiece);
@@ -1149,19 +1159,14 @@
                 }
             }
 
-            setPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                this.input.x = (clientX - rect.left) * (this.width / rect.width);
-                this.input.y = (clientY - rect.top) * (this.height / rect.height);
-            }
-
             setupInput() {
-                this.canvas.addEventListener('mousedown', e => this.onDown(e));
+                // Mouse
+                window.addEventListener('mousedown', e => this.onDown(e));
                 window.addEventListener('mousemove', e => this.onMove(e));
                 window.addEventListener('mouseup', e => this.onUp(e));
-                this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive: false});
+                
+                // Touch
+                window.addEventListener('touchstart', e => this.onDown(e), {passive: false});
                 window.addEventListener('touchmove', e => this.onMove(e), {passive: false});
                 window.addEventListener('touchend', e => this.onUp(e), {passive: false});
             }
