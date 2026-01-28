@@ -39,7 +39,6 @@
             transition: background-color 0.1s linear;
         }
 
-        /* --- UI LAYERS --- */
         .ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -54,18 +53,18 @@
         .active-layer { pointer-events: auto; }
         .hidden { opacity: 0; pointer-events: none !important; transition: opacity 0.3s; }
 
-        /* --- SCREENS --- */
         #start-screen { background: var(--accent); z-index: 300; }
         #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); }
         #death-screen { background: var(--accent); z-index: 250; }
 
         .menu-container {
-            padding: 40px 50px;
+            padding: 30px 40px;
             border-radius: 30px;
             text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 25px;
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.15);
             max-width: 95%; max-height: 98vh;
+            width: 400px;
             overflow-y: auto; overflow-x: hidden;
             box-sizing: border-box;
         }
@@ -83,24 +82,21 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
             animation: float 4s ease-in-out infinite;
+            margin-bottom: 10px;
         }
 
-        /* INPUT FIXES FOR MOBILE */
         #username-input { 
             background: rgba(255,255,255,0.2); 
             border: 3px solid rgba(255,255,255,0.4); 
             padding: 20px 30px; color: white; font-size: 24px; 
-            border-radius: 60px; outline: none; width: 300px; 
+            border-radius: 60px; outline: none; width: 280px; 
             text-align: center; font-weight: 800; letter-spacing: 1px;
-            transition: 0.3s;
-            pointer-events: auto;
-            user-select: text; 
-            -webkit-user-select: text;
-            z-index: 1000;
+            text-transform: uppercase; transition: 0.3s;
+            pointer-events: auto; user-select: text; -webkit-user-select: text; z-index: 1000;
         }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
 
-        .logo-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .logo-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .logo-block {
             width: 45px; height: 45px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -110,62 +106,66 @@
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-        /* LEADERBOARD */
+        /* LEADERBOARD CONTAINER - Fixed Height to prevent layout jumping */
         .online-lb { 
-            width: 100%; min-width: 360px; max-width: 500px;
+            width: 100%; 
             background: rgba(0,0,0,0.04); 
-            border-radius: 24px; padding: 30px; 
+            border-radius: 24px; padding: 20px; 
             border: 2px solid rgba(0,0,0,0.05); 
-            margin-bottom: 10px; box-sizing: border-box;
+            margin-bottom: 20px; box-sizing: border-box;
+            min-height: 250px;
+            display: flex; flex-direction: column;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
+        
         .lb-header { 
-            text-align: center; font-size: 18px; letter-spacing: 3px; 
-            font-weight: 900; margin-bottom: 25px; opacity: 0.8; text-transform: uppercase;
+            text-align: center; font-size: 16px; letter-spacing: 2px; 
+            font-weight: 900; margin-bottom: 15px; opacity: 0.7; text-transform: uppercase;
         }
+        .lb-content {
+            flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
+        }
+        
         .lb-row { 
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 10px; font-size: 20px; 
+            padding: 10px 5px; font-size: 18px; 
             border-bottom: 2px solid rgba(0,0,0,0.06); 
         }
         .dark-lb .lb-row { border-bottom: 2px solid rgba(255,255,255,0.15); }
         .lb-row:last-child { border: none; }
-        .lb-left { display: flex; align-items: center; gap: 15px; }
+        
+        .lb-left { display: flex; align-items: center; gap: 10px; }
         .lb-rank {
             background: var(--accent); color: white;
-            font-weight: 900; font-size: 18px;
-            width: 36px; height: 36px; border-radius: 10px;
+            font-weight: 900; font-size: 14px;
+            width: 28px; height: 28px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+            box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
         }
         .dark-lb .lb-rank { background: white; color: var(--accent); }
-        .lb-name { font-weight: 800; color: var(--text-color); letter-spacing: -0.5px; }
+        
+        .lb-name { font-weight: 800; font-size: 16px; color: var(--text-color); letter-spacing: -0.5px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .dark-lb .lb-name { color: white; }
-        .lb-score { font-weight: 900; color: var(--primary); font-size: 24px; }
+        
+        .lb-score { font-weight: 900; color: var(--primary); font-size: 18px; }
         .dark-lb .lb-score { color: white; }
 
         .btn {
-            border: none; padding: 22px 70px; font-size: 1.6rem; border-radius: 18px;
+            border: none; padding: 20px 60px; font-size: 1.5rem; border-radius: 18px;
             cursor: pointer; font-weight: 900; transition: transform 0.1s;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            text-transform: uppercase; letter-spacing: 1px;
-            pointer-events: auto; z-index: 1000;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 1px;
+            pointer-events: auto; z-index: 1000; display: block;
         }
         .btn:hover { transform: translateY(-3px); }
         .btn:active { transform: scale(0.96); }
         .btn-accent { background: var(--accent); color: white; } 
         .btn-white { background: white; color: var(--accent); }
 
-        /* Install Button specific style */
         .btn-install {
             background: rgba(255,255,255,0.2); 
-            color: white; 
-            padding: 15px 30px; 
-            font-size: 1rem; 
+            color: white; padding: 15px 30px; font-size: 1rem; 
             display: flex; align-items: center; gap: 10px;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: none;
+            margin-top: 10px; border: 1px solid rgba(255,255,255,0.4); box-shadow: none;
         }
 
         .header {
@@ -226,7 +226,6 @@
 
         @media (max-width: 500px) {
             .menu-container { padding: 30px 20px; width: 95%; }
-            .online-lb { min-width: 100%; padding: 20px; }
             .lb-row { font-size: 16px; }
             .header { top: 20px; }
             .controls-container { bottom: 25px; }
@@ -267,7 +266,9 @@
             
             <div class="online-lb">
                 <div class="lb-header">BEST WORLDWIDE</div>
-                <div id="main-lb-list" style="width: 100%;">Loading...</div>
+                <div id="main-lb-list" class="lb-content">
+                    <div style="text-align:center; opacity:0.5;">Loading...</div>
+                </div>
             </div>
 
             <button class="btn btn-accent" id="startBtn">PLAY</button>
@@ -291,7 +292,9 @@
             
             <div class="online-lb dark-lb">
                 <div class="lb-header" style="color:white;">BEST WORLDWIDE</div>
-                <div id="death-lb-list" style="width: 100%;">Loading...</div>
+                <div id="death-lb-list" class="lb-content">
+                    <div style="text-align:center; opacity:0.5;">Loading...</div>
+                </div>
             </div>
 
             <button class="btn btn-white" id="retryBtn">Play Again</button>
@@ -303,6 +306,8 @@
             <div class="big-logo" style="width:60px; height:60px; font-size:2rem; margin: 0 auto 15px auto;">M</div>
             <div class="install-title">Install App</div>
             <div class="install-text">Add Mosaic Fit to your home screen for the full screen experience.</div>
+            
+            <button id="android-install-btn" class="btn btn-accent" style="display:none; padding: 15px 30px; font-size: 1.2rem; margin: 0 auto;">Install Now</button>
             
             <div id="ios-install-hint" style="display:none;">
                 <div class="ios-instruction">1. Tap <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> Share</div>
@@ -322,6 +327,14 @@
 
         async function fetchLeaderboard() {
             const dreamloURL = `http://dreamlo.com/lb/${DREAMLO_PUB}/json`;
+            
+            // Helper to render
+            const render = (entries) => {
+                hasLoadedLB = true;
+                currentLeaderboard = entries;
+                updateOnlineLB(entries);
+            };
+
             const parseData = (text) => {
                 try {
                     const data = JSON.parse(text);
@@ -333,38 +346,45 @@
                 } catch(e) { return null; }
             };
 
-            let newScores = null;
+            // Attempt 1: CodeTabs
             try {
                 const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(dreamloURL)}`;
                 const response = await fetch(proxyUrl);
                 const text = await response.text();
-                newScores = parseData(text);
+                const scores = parseData(text);
+                if (scores) { render(scores); return; }
             } catch (e) {}
 
-            if (!newScores) {
-                try {
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(dreamloURL)}&t=${Date.now()}`;
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
-                    if (data && data.contents) newScores = parseData(data.contents);
-                } catch (e) {}
-            }
-
-            if (newScores) {
-                currentLeaderboard = newScores;
-                hasLoadedLB = true;
+            // Attempt 2: AllOrigins
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(dreamloURL)}&t=${Date.now()}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                if (data && data.contents) {
+                    const scores = parseData(data.contents);
+                    if (scores) { render(scores); return; }
+                }
+            } catch (e) {}
+            
+            // Fallback: If both fail, keep old data or show offline
+            if(hasLoadedLB) {
                 updateOnlineLB(currentLeaderboard);
-            } else if (hasLoadedLB) {
-                updateOnlineLB(currentLeaderboard);
+            } else {
+                const offlineHtml = '<div style="text-align:center; opacity:0.5;">Offline mode</div>';
+                document.getElementById('main-lb-list').innerHTML = offlineHtml;
+                document.getElementById('death-lb-list').innerHTML = offlineHtml;
             }
         }
 
+        // Start Fetch immediately
         setInterval(fetchLeaderboard, 10000);
         fetchLeaderboard();
 
         function submitScore(name, score) {
             if(score > 0) {
                 const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 12) || "Guest";
+                
+                // Optimistic UI Update
                 currentLeaderboard.push({ name: cleanName, score: score });
                 currentLeaderboard.sort((a,b) => b.score - a.score);
                 hasLoadedLB = true; 
@@ -372,20 +392,14 @@
 
                 const targetUrl = `http://dreamlo.com/lb/${DREAMLO_PRIV}/add/${cleanName}/${score}`;
                 const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+                
+                // Fire and forget
                 fetch(proxyUrl).catch(e => console.log("Submit Error"));
             }
         }
 
         function updateOnlineLB(entries) {
             entries.sort((a,b) => b.score - a.score);
-            
-            if (!hasLoadedLB && entries.length === 0) {
-                 const loadingHtml = '<div style="text-align:center; opacity:0.5; padding:20px;">Loading...</div>';
-                 document.getElementById('main-lb-list').innerHTML = loadingHtml;
-                 document.getElementById('death-lb-list').innerHTML = loadingHtml;
-                 return;
-            }
-
             const html = entries.length > 0 ? entries.slice(0, 5).map((e, i) => `
                 <div class="lb-row">
                     <div class="lb-left">
@@ -394,7 +408,7 @@
                     </div>
                     <div class="lb-score">${e.score}</div>
                 </div>
-            `).join('') : '<div style="text-align:center; opacity:0.5; padding:20px;">No Scores Yet</div>';
+            `).join('') : '<div style="text-align:center; opacity:0.5;">No Scores Yet</div>';
             
             const mainList = document.getElementById('main-lb-list');
             const deathList = document.getElementById('death-lb-list');
@@ -410,19 +424,13 @@
             const userAgent = window.navigator.userAgent.toLowerCase();
             const isIOS = /iphone|ipad|ipod/.test(userAgent);
 
-            // Only show button if NOT in app mode
             if (!isStandalone) {
-                // If Android/Chrome supports install prompt
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
-                    btn.style.display = 'flex'; // Show button
+                    btn.style.display = 'flex'; 
                 });
-                
-                // If iOS, show button always (manual trigger)
-                if (isIOS) {
-                     btn.style.display = 'flex';
-                }
+                if (isIOS) btn.style.display = 'flex';
             }
         });
 
@@ -432,18 +440,15 @@
             const modal = document.getElementById('install-modal');
 
             if (isIOS) {
-                // Show iOS instructions
                 document.getElementById('ios-install-hint').style.display = 'block';
                 modal.classList.remove('hidden');
                 setTimeout(() => modal.classList.add('active'), 10);
             } else if (deferredPrompt) {
-                // Trigger Android Prompt
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(() => {
                     deferredPrompt = null;
                 });
             } else {
-                // Fallback for desktop/other
                 alert("Use your browser's menu to Install App or Add to Home Screen.");
             }
         };
@@ -577,7 +582,6 @@
                 this.pointer.isDown = true;
 
                 let bestPiece = null;
-                // Extended hit area logic
                 const yToleranceUp = this.cellSize * 1.5; 
                 const yToleranceDown = this.cellSize * 5.0; 
                 const xTolerance = this.width / 5; 
@@ -1151,4 +1155,3 @@
     </script>
 </body>
 </html>
-
