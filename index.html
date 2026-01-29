@@ -158,7 +158,6 @@
         }
         .score-pop { transform: scale(1.3); color: var(--accent); }
         
-        /* UNDO BUTTON IN HEADER */
         .header-icon-btn {
             width: 55px; height: 55px; background: white; border-radius: 14px;
             border: none; display: flex; align-items: center; justify-content: center;
@@ -399,7 +398,7 @@
             if(hasLoadedLB) updateOnlineLB(currentLeaderboard);
         }
 
-        setInterval(fetchLeaderboard, 5000); // 5s refresh
+        setInterval(fetchLeaderboard, 5000); 
         fetchLeaderboard();
 
         function submitScore(name, score) {
@@ -433,7 +432,6 @@
             if(deathList) deathList.innerHTML = html;
         }
 
-        // Install Logic
         let deferredPrompt;
         window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
@@ -527,10 +525,11 @@
                 this.floatingTexts = [];
                 this.placingBlocks = [];
                 this.clearingCells = new Set();
-                this.history = null; // For Undo
+                this.history = null; 
                 
                 this.score = 0;
                 this.dragPiece = null;
+                this.isHoveringHold = false;
                 
                 this.dragOffset = {x: 0, y: 0};
                 this.pointer = {x: 0, y: 0, isDown: false};
@@ -557,7 +556,6 @@
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
                 this.ui.undoBtn.addEventListener('click', () => this.performUndo());
 
-                // Abandon Handlers
                 document.getElementById('btn-stay').addEventListener('click', () => {
                     this.isPaused = false;
                     this.ui.abandon.classList.add('hidden');
@@ -591,26 +589,20 @@
                 this.boardTop = 30;
                 this.boardLeft = 20;
 
-                // --- NEW LAYOUT CALCULATION ---
-                // 1. Board Top
-                // 2. Board Grid
                 const gridHeight = GRID_SIZE * this.cellSize;
                 
-                // 3. Hold Zone (Below Board)
-                const holdSize = this.cellSize * 2.2; // Larger Hold
+                const holdSize = this.cellSize * 2.2; 
                 this.holdZone = {
                     w: holdSize,
                     h: holdSize,
-                    x: (this.width - holdSize) / 2, // Centered
-                    y: this.boardTop + gridHeight + 25 // 25px gap below board
+                    x: (this.width - holdSize) / 2, 
+                    y: this.boardTop + gridHeight + 25 
                 };
 
-                // 4. Dock (Below Hold)
-                this.dockY = this.holdZone.y + this.holdZone.h + 20; // 20px gap below hold
+                this.dockY = this.holdZone.y + this.holdZone.h + 20; 
                 this.dockHeight = this.cellSize * 5;
 
-                // Total Height
-                this.height = this.dockY + this.cellSize * 3.5; // Enough room for pieces
+                this.height = this.dockY + this.cellSize * 3.5; 
 
                 this.canvas.width = this.width * 2; 
                 this.canvas.height = this.height * 2;
@@ -652,7 +644,6 @@
                 this.pointer.y = pos.y;
                 this.pointer.isDown = true;
 
-                // Check Hold Zone Click
                 if (this.holdPiece && 
                     pos.x > this.holdZone.x && pos.x < this.holdZone.x + this.holdZone.w &&
                     pos.y > this.holdZone.y && pos.y < this.holdZone.y + this.holdZone.h) {
@@ -695,7 +686,7 @@
                     this.dragOffset.y = -(bestPiece.h / 2);
                     
                     if (e.touches) {
-                        this.dragOffset.y -= 100; // Lift above finger
+                        this.dragOffset.y -= 100; 
                     }
                     AudioSys.play('pop');
                 }
@@ -711,11 +702,17 @@
 
                 this.dragPiece.x = pos.x + this.dragOffset.x;
                 this.dragPiece.y = pos.y + this.dragOffset.y;
+
+                const centerPx = this.dragPiece.x + this.dragPiece.w/2;
+                const centerPy = this.dragPiece.y + this.dragPiece.h/2;
+                this.isHoveringHold = (centerPx > this.holdZone.x && centerPx < this.holdZone.x + this.holdZone.w &&
+                                       centerPy > this.holdZone.y && centerPy < this.holdZone.y + this.holdZone.h);
             }
 
             handleEnd(e) {
                 if (!this.pointer.isDown) return;
                 this.pointer.isDown = false;
+                this.isHoveringHold = false;
 
                 if (this.dragPiece) {
                     const centerPx = this.dragPiece.x + this.dragPiece.w/2;
@@ -732,13 +729,11 @@
 
                     const snap = this.getSnapCoordinates(this.dragPiece);
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
-                        this.saveState(); // Save before move for Undo
+                        this.saveState(); 
                         this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
                     } else {
-                        // Return to dock (or to hold if it came from there)
                         this.dragPiece.isDragging = false;
                         if (!this.dockPieces.includes(this.dragPiece)) {
-                            // Came from hold, return to hold
                             this.holdPiece = this.dragPiece;
                             this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
                             this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
@@ -751,14 +746,11 @@
             }
 
             saveState() {
-                // Deep copy grid and score
                 this.history = {
                     grid: JSON.parse(JSON.stringify(this.grid)),
                     score: this.score,
                     holdPiece: this.holdPiece ? {...this.holdPiece} : null,
                     dockPieces: this.dockPieces.map(p => ({...p})) 
-                    // Note: Dock pieces refs will break on restore, but logic handles regeneration usually. 
-                    // Here we just restore data.
                 };
                 this.ui.undoBtn.classList.remove('disabled');
             }
@@ -770,20 +762,17 @@
                 this.score = this.history.score;
                 this.ui.scoreBox.innerText = this.score;
                 
-                // Restore Hold
                 this.holdPiece = this.history.holdPiece;
                 if(this.holdPiece) {
-                    // Recenter hold piece visually
                     this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
                     this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
                     this.holdPiece.scale = 0.55;
                 }
 
-                // Restore Dock
                 this.dockPieces = this.history.dockPieces.map(p => {
                     return {
                         ...p,
-                        x: p.baseX, y: p.baseY, // Reset to base pos
+                        x: p.baseX, y: p.baseY, 
                         scale: 0.55, isDragging: false
                     };
                 });
@@ -794,20 +783,18 @@
             }
 
             swapHold() {
-                this.saveState(); // Undoable
+                this.saveState(); 
                 AudioSys.play('hold');
                 const piece = this.dragPiece;
                 piece.isDragging = false;
                 piece.scale = 0.55; 
 
                 if (this.holdPiece) {
-                    // Swap
                     const oldHold = this.holdPiece;
                     this.holdPiece = piece;
                     
                     if (this.dockPieces.includes(piece)) {
                         const idx = this.dockPieces.indexOf(piece);
-                        // Move old hold to dock
                         oldHold.x = piece.baseX;
                         oldHold.y = piece.baseY;
                         oldHold.baseX = piece.baseX;
@@ -818,13 +805,11 @@
                         this.dockPieces[idx] = oldHold;
                     }
                 } else {
-                    // Empty hold
                     this.holdPiece = piece;
                     const idx = this.dockPieces.indexOf(piece);
                     if (idx > -1) this.dockPieces.splice(idx, 1);
                 }
 
-                // Center new hold piece
                 this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
                 this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
 
@@ -887,6 +872,7 @@
                 this.ui.undoBtn.classList.add('disabled');
                 this.isDying = false;
                 this.isSpawning = false;
+                this.isHoveringHold = false;
                 this.targetRGB = [240, 242, 245];
                 this.ui.gameOver.classList.add('hidden');
                 this.ui.gameOver.classList.remove('active-layer');
@@ -921,7 +907,6 @@
                         if (baseX < 15) baseX = 15;
                         if (baseX + visualW > this.width - 15) baseX = this.width - visualW - 15;
                         
-                        // Spawn relative to new dockY
                         const baseY = this.dockY + (this.cellSize * 1.5) - (visualH / 2);
 
                         this.dockPieces.push({
@@ -1133,7 +1118,6 @@
                 
                 let canMove = false;
                 
-                // Check Dock
                 for (let piece of this.dockPieces) {
                     for (let x = 0; x < GRID_SIZE; x++) {
                         for (let y = 0; y < GRID_SIZE; y++) {
@@ -1144,7 +1128,6 @@
                     if (canMove) break;
                 }
 
-                // Check Hold (if exists)
                 if (!canMove && this.holdPiece) {
                      for (let x = 0; x < GRID_SIZE; x++) {
                         for (let y = 0; y < GRID_SIZE; y++) {
@@ -1155,11 +1138,9 @@
                 }
                 
                 if (!canMove) {
-                    // Not dead if can hold a dock piece (and hold is empty)
                     if (this.holdPiece === null && this.dockPieces.length > 0) {
                         return; 
                     }
-                    
                     AudioSys.play('gameover');
                     this.startDeathAnimation();
                 }
@@ -1230,7 +1211,15 @@
 
                 // --- DRAW LARGE CENTER HOLD ZONE ---
                 if (this.holdZone) {
-                    // Frame
+                    // Border Change on Hover
+                    const borderColor = this.isHoveringHold ? 'var(--accent)' : 'white';
+                    if (this.isHoveringHold) {
+                        this.ctx.fillStyle = 'var(--accent)';
+                        // Simulate border by filling slightly larger
+                        this.drawRoundedRect(this.holdZone.x - 3, this.holdZone.y - 3, this.holdZone.w + 6, 'var(--accent)', true);
+                    }
+
+                    // Main Box
                     this.ctx.shadowColor = "rgba(0,0,0,0.1)";
                     this.ctx.shadowBlur = 10;
                     this.ctx.shadowOffsetY = 5;
@@ -1239,14 +1228,34 @@
                     this.ctx.shadowOffsetY = 0;
 
                     // Text
-                    if(!this.holdPiece) {
+                    if(!this.holdPiece && !this.isHoveringHold) {
                         this.ctx.fillStyle = "rgba(0,0,0,0.15)";
                         this.ctx.font = "bold 14px sans-serif";
                         this.ctx.textAlign = "center";
                         this.ctx.fillText("HOLD", this.holdZone.x + this.holdZone.w/2, this.holdZone.y + this.holdZone.h/2 + 5);
                     }
 
-                    // Piece
+                    // GHOST PIECE ON HOVER
+                    if (this.isHoveringHold && this.dragPiece) {
+                        const cx = this.holdZone.x + this.holdZone.w/2;
+                        const cy = this.holdZone.y + this.holdZone.h/2;
+                        
+                        const shapeW = this.dragPiece.w * 0.45; 
+                        const shapeH = this.dragPiece.h * 0.45;
+                        const startX = cx - shapeW/2;
+                        const startY = cy - shapeH/2;
+
+                        this.ctx.save();
+                        this.ctx.globalAlpha = 0.4; // Ghost opacity
+                        for (let block of this.dragPiece.shape) {
+                            let bx = startX + (block[0] * this.cellSize * 0.45);
+                            let by = startY + (block[1] * this.cellSize * 0.45);
+                            this.drawRoundedRect(bx, by, this.cellSize * 0.45, this.dragPiece.color, true);
+                        }
+                        this.ctx.restore();
+                    }
+
+                    // ACTUAL HOLD PIECE
                     if (this.holdPiece) {
                         const cx = this.holdZone.x + this.holdZone.w/2;
                         const cy = this.holdZone.y + this.holdZone.h/2;
@@ -1309,31 +1318,59 @@
 
                 // Dragging Piece Shadow & Piece
                 if (this.dragPiece && !this.isAnimating) {
-                    this.ctx.globalAlpha = 0.5;
-                    this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
-                    for (let block of this.dragPiece.shape) {
-                        let bx = this.dragPiece.x + (block[0] * this.cellSize) + 5;
-                        let by = this.dragPiece.y + (block[1] * this.cellSize) + 10;
-                        this.drawRoundedRect(bx, by, this.cellSize, 'black', true, true);
+                    
+                    // IF HOVERING HOLD: Draw Smaller and Centered under finger (or snapped)
+                    let scale = this.isHoveringHold ? 0.45 : 1.0;
+                    
+                    this.ctx.save();
+                    
+                    // Simple logic: if hovering hold, we just draw it small at cursor
+                    // (The ghost in the box handles the "snap" visual)
+
+                    // Shadow
+                    if (!this.isHoveringHold) {
+                        this.ctx.globalAlpha = 0.5;
+                        this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                        for (let block of this.dragPiece.shape) {
+                            let bx = this.dragPiece.x + (block[0] * this.cellSize) + 5;
+                            let by = this.dragPiece.y + (block[1] * this.cellSize) + 10;
+                            this.drawRoundedRect(bx, by, this.cellSize, 'black', true, true);
+                        }
                     }
+
                     this.ctx.globalAlpha = 1.0;
 
                     for (let block of this.dragPiece.shape) {
-                        let bx = this.dragPiece.x + (block[0] * this.cellSize);
-                        let by = this.dragPiece.y + (block[1] * this.cellSize);
-                        this.drawRoundedRect(bx, by, this.cellSize, this.dragPiece.color, true);
+                        // If hovering hold, we offset to center the smaller piece
+                        let bx, by;
+                        if(this.isHoveringHold) {
+                            // Center of piece logic?
+                            // dragPiece.x is top left.
+                            // We want visual center to be at finger? 
+                            // For simplicity, just draw at dragPiece coordinates but scaled
+                             bx = this.dragPiece.x + (block[0] * this.cellSize * scale);
+                             by = this.dragPiece.y + (block[1] * this.cellSize * scale);
+                        } else {
+                             bx = this.dragPiece.x + (block[0] * this.cellSize);
+                             by = this.dragPiece.y + (block[1] * this.cellSize);
+                        }
+                        this.drawRoundedRect(bx, by, this.cellSize * scale, this.dragPiece.color, true);
                     }
                     
-                    const snap = this.getSnapCoordinates(this.dragPiece);
-                    if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
-                        this.ctx.globalAlpha = 0.3;
-                        for (let block of this.dragPiece.shape) {
-                            let px = this.boardLeft + (snap.gridX + block[0]) * this.cellSize;
-                            let py = this.boardTop + (snap.gridY + block[1]) * this.cellSize;
-                            this.drawRoundedRect(px, py, this.cellSize, this.dragPiece.color, true);
+                    // Grid Snap Ghost (Only if not holding)
+                    if (!this.isHoveringHold) {
+                        const snap = this.getSnapCoordinates(this.dragPiece);
+                        if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                            this.ctx.globalAlpha = 0.3;
+                            for (let block of this.dragPiece.shape) {
+                                let px = this.boardLeft + (snap.gridX + block[0]) * this.cellSize;
+                                let py = this.boardTop + (snap.gridY + block[1]) * this.cellSize;
+                                this.drawRoundedRect(px, py, this.cellSize, this.dragPiece.color, true);
+                            }
+                            this.ctx.globalAlpha = 1.0;
                         }
-                        this.ctx.globalAlpha = 1.0;
                     }
+                    this.ctx.restore();
                 }
 
                 // Dock Pieces
