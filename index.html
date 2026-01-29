@@ -250,9 +250,7 @@
         <div class="header">
             <div class="mini-logo" onclick="openAbandon()">M</div>
             <div class="score-box" id="scoreBox">0</div>
-            <button class="header-icon-btn disabled" id="undoBtn">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-            </button>
+            <div style="width: 55px;"></div> 
         </div>
     </div>
 
@@ -514,8 +512,7 @@
                     gameOver: document.getElementById('death-screen'),
                     scoreBox: document.getElementById('scoreBox'),
                     finalScore: document.getElementById('finalScore'),
-                    abandon: document.getElementById('abandon-modal'),
-                    undoBtn: document.getElementById('undoBtn')
+                    abandon: document.getElementById('abandon-modal')
                 };
 
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
@@ -525,7 +522,6 @@
                 this.floatingTexts = [];
                 this.placingBlocks = [];
                 this.clearingCells = new Set();
-                this.history = null; 
                 
                 this.score = 0;
                 this.dragPiece = null;
@@ -554,7 +550,6 @@
                     this.startGame();
                 });
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
-                this.ui.undoBtn.addEventListener('click', () => this.performUndo());
 
                 document.getElementById('btn-stay').addEventListener('click', () => {
                     this.isPaused = false;
@@ -706,7 +701,7 @@
                 const centerPx = this.dragPiece.x + this.dragPiece.w/2;
                 const centerPy = this.dragPiece.y + this.dragPiece.h/2;
                 this.isHoveringHold = (centerPx > this.holdZone.x && centerPx < this.holdZone.x + this.holdZone.w &&
-                                       centerPy > this.holdZone.y && centerPy < this.holdZone.y + this.holdZone.h);
+                                     centerPy > this.holdZone.y && centerPy < this.holdZone.y + this.holdZone.h);
             }
 
             handleEnd(e) {
@@ -729,7 +724,6 @@
 
                     const snap = this.getSnapCoordinates(this.dragPiece);
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
-                        this.saveState(); 
                         this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
                     } else {
                         this.dragPiece.isDragging = false;
@@ -745,45 +739,7 @@
                 }
             }
 
-            saveState() {
-                this.history = {
-                    grid: JSON.parse(JSON.stringify(this.grid)),
-                    score: this.score,
-                    holdPiece: this.holdPiece ? {...this.holdPiece} : null,
-                    dockPieces: this.dockPieces.map(p => ({...p})) 
-                };
-                this.ui.undoBtn.classList.remove('disabled');
-            }
-
-            performUndo() {
-                if(!this.history) return;
-                
-                this.grid = JSON.parse(JSON.stringify(this.history.grid));
-                this.score = this.history.score;
-                this.ui.scoreBox.innerText = this.score;
-                
-                this.holdPiece = this.history.holdPiece;
-                if(this.holdPiece) {
-                    this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
-                    this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
-                    this.holdPiece.scale = 0.55;
-                }
-
-                this.dockPieces = this.history.dockPieces.map(p => {
-                    return {
-                        ...p,
-                        x: p.baseX, y: p.baseY, 
-                        scale: 0.55, isDragging: false
-                    };
-                });
-
-                this.history = null;
-                this.ui.undoBtn.classList.add('disabled');
-                AudioSys.play('pop');
-            }
-
             swapHold() {
-                this.saveState(); 
                 AudioSys.play('hold');
                 const piece = this.dragPiece;
                 piece.isDragging = false;
@@ -868,8 +824,6 @@
                 this.floatingTexts = [];
                 this.placingBlocks = [];
                 this.clearingCells.clear();
-                this.history = null;
-                this.ui.undoBtn.classList.add('disabled');
                 this.isDying = false;
                 this.isSpawning = false;
                 this.isHoveringHold = false;
@@ -954,8 +908,8 @@
                 return [r, g, b];
             }
 
-            spawnFloatingText(text, x, y, color = '#2ed573') {
-                this.floatingTexts.push({ text: text, x: x, y: y, color: color, life: 1.0, velocityY: -2 });
+            spawnFloatingText(text, x, y, color = '#2ed573', size = 40) {
+                this.floatingTexts.push({ text: text, x: x, y: y, color: color, life: 1.0, velocityY: -2, size: size });
             }
 
             placePiece(piece, gridX, gridY) {
@@ -1070,8 +1024,29 @@
                     });
 
                     this.clearingCells = finalClears;
-                    if (rowsCleared + colsCleared > 1) setTimeout(() => this.spawnFloatingText(`COMBO!`, this.width/2, this.height/2 - 50, '#feca57'), 100);
-                    setTimeout(() => this.processClears(finalClears), 250);
+                    
+                    const totalLines = rowsCleared + colsCleared;
+                    
+                    // --- REWARDING COMBO LOGIC ---
+                    if (totalLines > 0) {
+                        let text = "";
+                        let size = 50;
+                        let color = "#ff4757"; // Default Red accent
+                        
+                        if (totalLines === 2) { text = "DOUBLE!"; size = 60; color = "#ffa502"; }
+                        else if (totalLines === 3) { text = "TRIPLE!"; size = 70; color = "#ff6348"; }
+                        else if (totalLines === 4) { text = "MEGA!"; size = 80; color = "#2ed573"; }
+                        else if (totalLines >= 5) { text = "INSANE!"; size = 90; color = "#e056fd"; }
+                        else if (totalLines === 1 && finalClears.size > 12) { text = "BIG CLEAR!"; size = 50; color = "#1e90ff"; }
+
+                        // Trigger big center text
+                        if (text) {
+                            setTimeout(() => this.spawnFloatingText(text, this.width/2, this.height/2 - 80, color, size), 100);
+                            this.shake = 8 + (totalLines * 4); // Bigger shake for bigger combos
+                        }
+                    }
+
+                    setTimeout(() => this.processClears(finalClears, totalLines), 250);
                 } else {
                     this.isAnimating = false;
                     if (this.dockPieces.length === 0) this.spawnPieces();
@@ -1079,9 +1054,11 @@
                 }
             }
 
-            processClears(cellsSet) {
+            processClears(cellsSet, multiplier) {
                 let count = 0;
-                this.shake = 6 + Math.min(cellsSet.size, 10); 
+                // Base shake is smaller, big shakes handled in checkMatches
+                if(this.shake < 5) this.shake = 6 + Math.min(cellsSet.size, 10); 
+                
                 this.flashAlpha = 0.5;
                 cellsSet.forEach(key => {
                     const [x, y] = key.split(',').map(Number);
@@ -1089,9 +1066,16 @@
                     this.grid[y][x] = null;
                     count++;
                 });
-                let points = (count * 20) + (count - 4) * 30;
+                
+                // Score calculation with multiplier
+                let mult = multiplier > 0 ? multiplier : 1;
+                let points = ((count * 20) + (count - 4) * 30) * mult;
+                
                 this.updateScore(points);
-                this.spawnFloatingText(`+${points}`, this.width/2, this.height/2);
+                
+                // Spawn Floating Score (Gold color, large size)
+                this.spawnFloatingText(`+${points}`, this.width/2, this.height/2, '#f1c40f', 50);
+                
                 this.clearingCells.clear();
                 setTimeout(() => {
                     this.isAnimating = false;
@@ -1148,7 +1132,6 @@
 
             startDeathAnimation() {
                 this.isDying = true;
-                this.ui.undoBtn.classList.add('disabled');
                 for (let y = 0; y < GRID_SIZE; y++) {
                     setTimeout(() => {
                         for (let x = 0; x < GRID_SIZE; x++) {
@@ -1324,9 +1307,6 @@
                     
                     this.ctx.save();
                     
-                    // Simple logic: if hovering hold, we just draw it small at cursor
-                    // (The ghost in the box handles the "snap" visual)
-
                     // Shadow
                     if (!this.isHoveringHold) {
                         this.ctx.globalAlpha = 0.5;
@@ -1344,10 +1324,6 @@
                         // If hovering hold, we offset to center the smaller piece
                         let bx, by;
                         if(this.isHoveringHold) {
-                            // Center of piece logic?
-                            // dragPiece.x is top left.
-                            // We want visual center to be at finger? 
-                            // For simplicity, just draw at dragPiece coordinates but scaled
                              bx = this.dragPiece.x + (block[0] * this.cellSize * scale);
                              by = this.dragPiece.y + (block[1] * this.cellSize * scale);
                         } else {
@@ -1413,7 +1389,8 @@
                         this.ctx.save();
                         this.ctx.globalAlpha = t.life;
                         this.ctx.fillStyle = t.color;
-                        this.ctx.font = "900 32px 'Segoe UI'";
+                        // DYNAMIC SIZE HERE
+                        this.ctx.font = "900 " + t.size + "px 'Segoe UI'";
                         this.ctx.textAlign = "center";
                         this.ctx.shadowColor = "rgba(0,0,0,0.2)";
                         this.ctx.shadowBlur = 10;
