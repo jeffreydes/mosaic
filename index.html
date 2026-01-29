@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>Mosaic</title>
+    <title>Mosaic Fit</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ff4757">
@@ -52,8 +52,6 @@
         }
 
         .active-layer { pointer-events: auto; }
-        
-        /* STRICT HIDING to prevent ghost clicks */
         .hidden { display: none !important; pointer-events: none !important; }
 
         #start-screen { background: var(--accent); z-index: 300; }
@@ -179,13 +177,14 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 6px 18px rgba(255, 71, 87, 0.4);
             animation: float 4s ease-in-out infinite;
-            pointer-events: auto; cursor: pointer; /* Clickable */
+            pointer-events: auto; cursor: pointer;
         }
         .score-box {
             background: white; padding: 12px 35px; border-radius: 35px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             font-weight: 800; font-size: 1.8rem; color: var(--primary);
             transition: transform 0.1s;
+            min-width: 80px; text-align: center;
         }
         .score-pop { transform: scale(1.3); color: var(--accent); }
 
@@ -227,6 +226,7 @@
             .btn { font-size: 1.3rem; padding: 20px 50px; }
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
             #username-input { width: 240px; font-size: 20px; }
+            .score-box { font-size: 1.5rem; padding: 10px 25px; }
         }
     </style>
 </head>
@@ -271,6 +271,7 @@
         <div class="header">
             <div class="mini-logo" onclick="openAbandon()">M</div>
             <div class="score-box" id="scoreBox">0</div>
+            <div style="width:55px;"></div> 
         </div>
     </div>
 
@@ -316,6 +317,81 @@
     </div>
 
     <script>
+        // --- AUDIO SYSTEM ---
+        const AudioSys = {
+            ctx: null,
+            init: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            play: function(type) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                const now = this.ctx.currentTime;
+                
+                if (type === 'pop') {
+                    // Pick up sound
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'snap') {
+                    // Place sound
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'hold') {
+                    // Hold sound (swish)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.15);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'clear') {
+                    // Clear/Combo sound
+                    osc.type = 'sine';
+                    // Chord
+                    const freqs = [523.25, 659.25, 783.99]; // C Major
+                    freqs.forEach((f, i) => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.connect(g);
+                        g.connect(this.ctx.destination);
+                        o.frequency.value = f;
+                        g.gain.setValueAtTime(0.05, now + i*0.05);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 0.5 + i*0.05);
+                        o.start(now + i*0.05);
+                        o.stop(now + 0.6 + i*0.05);
+                    });
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 1);
+                    osc.start(now);
+                    osc.stop(now + 1);
+                }
+            }
+        };
+
         const DREAMLO_PUB = "697a67638f40bb1184c753d8";
         const DREAMLO_PRIV = "1T4aM6LFPEWY2ApIVDHBwA86dlEuPxH0WOrypoNivp-Q";
         let currentLeaderboard = [];
@@ -439,6 +515,7 @@
         };
 
         window.enterMainMenu = () => {
+            AudioSys.init(); // Init Audio Context
             const input = document.getElementById('username-input');
             const val = input.value.trim();
             if (val) myName = val;
@@ -448,7 +525,7 @@
             document.getElementById('main-menu').classList.add('active-layer');
         };
 
-        // GLOBAL HELPER TO TRIGGER ABANDON (Needed because 'this' context in HTML onclick is weird)
+        // GLOBAL HELPER TO TRIGGER ABANDON
         window.openAbandon = () => {
             if(window.gameInstance) window.gameInstance.requestAbandon();
         };
@@ -484,6 +561,7 @@
 
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
                 this.dockPieces = [];
+                this.holdPiece = null; // HOLD FEATURE
                 this.particles = [];
                 this.floatingTexts = [];
                 this.placingBlocks = [];
@@ -510,7 +588,10 @@
                 
                 this.setupInput();
 
-                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    AudioSys.init(); // Ensure audio context triggers on click
+                    this.startGame();
+                });
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
 
                 // Abandon Handlers
@@ -555,6 +636,14 @@
 
                 this.boardTop = 30;
                 this.boardLeft = 20;
+
+                // Define Hold Zone (Top Right)
+                this.holdZone = {
+                    x: this.width - 70,
+                    y: 30,
+                    w: 55,
+                    h: 55
+                };
             }
 
             setupInput() {
@@ -590,22 +679,40 @@
                 this.pointer.y = pos.y;
                 this.pointer.isDown = true;
 
+                // Check Hold Zone Click (to swap out if no drag)
+                if (this.holdPiece && 
+                    pos.x > this.holdZone.x && pos.x < this.holdZone.x + this.holdZone.w &&
+                    pos.y > this.holdZone.y && pos.y < this.holdZone.y + this.holdZone.h) {
+                    
+                    // Simple logic: if click hold zone, try to swap with nothing (bring it out)
+                    // But standard UI is drag hold piece out or swap.
+                    // Let's implement Drag from Hold
+                    this.dragPiece = this.holdPiece;
+                    this.dragPiece.isDragging = true;
+                    // Center it
+                    this.dragOffset.x = -(this.dragPiece.w / 2);
+                    this.dragOffset.y = -(this.dragPiece.h / 2);
+                    if (e.touches) this.dragOffset.y -= 80;
+                    
+                    // Temporarily remove from hold to drag it
+                    this.holdPiece = null;
+                    AudioSys.play('pop');
+                    return;
+                }
+
                 let bestPiece = null;
-                // Expanded Hit Box - Asymmetric (More tolerance below)
                 const yToleranceUp = this.cellSize * 1.5; 
                 const yToleranceDown = this.cellSize * 5.0; 
-                const xTolerance = this.width / 3.5; // Wider for mobile
+                const xTolerance = this.width / 3.5; 
 
                 for (let piece of this.dockPieces) {
-                    // Calculate visual center based on 0.55 scale
                     const centerX = piece.x + (piece.w * 0.55 / 2); 
                     const centerY = piece.y + (piece.h * 0.55 / 2);
 
                     const dx = Math.abs(pos.x - centerX);
-                    const dy = pos.y - centerY; // + is below, - is above
+                    const dy = pos.y - centerY; 
 
                     if (dx < xTolerance) {
-                        // We check significantly below the block too
                         if (dy > -yToleranceUp && dy < yToleranceDown) {
                             bestPiece = piece;
                         }
@@ -616,17 +723,13 @@
                     this.dragPiece = bestPiece;
                     bestPiece.isDragging = true;
                     
-                    // AUTO CENTER SNAP:
-                    // Instead of keeping offset, we snap the center of the block to the finger
-                    // calculated such that the block visual center is under the finger (plus lift)
-                    // The visual width is piece.w * 0.55. But when dragging, we scale to 1.0.
-                    // So we must center the 1.0 scale block.
                     this.dragOffset.x = -(bestPiece.w / 2);
                     this.dragOffset.y = -(bestPiece.h / 2);
                     
                     if (e.touches) {
                         this.dragOffset.y -= 100; // Lift above finger
                     }
+                    AudioSys.play('pop');
                 }
             }
 
@@ -638,10 +741,6 @@
                 this.pointer.x = pos.x;
                 this.pointer.y = pos.y;
 
-                // Center of piece follows pointer + offset
-                // But piece.x represents top-left.
-                // handleStart set dragOffset to shift top-left relative to pointer.
-                // Actually, let's just apply the calculation:
                 this.dragPiece.x = pos.x + this.dragOffset.x;
                 this.dragPiece.y = pos.y + this.dragOffset.y;
             }
@@ -651,14 +750,80 @@
                 this.pointer.isDown = false;
 
                 if (this.dragPiece) {
+                    const centerPx = this.dragPiece.x + this.dragPiece.w/2;
+                    const centerPy = this.dragPiece.y + this.dragPiece.h/2;
+
+                    // CHECK HOLD ZONE DROP
+                    if (centerPx > this.holdZone.x - 20 && centerPx < this.holdZone.x + this.holdZone.w + 20 &&
+                        centerPy > this.holdZone.y - 20 && centerPy < this.holdZone.y + this.holdZone.h + 20) {
+                        
+                        this.swapHold();
+                        this.dragPiece = null;
+                        return;
+                    }
+
                     const snap = this.getSnapCoordinates(this.dragPiece);
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
                         this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
                     } else {
+                        // Return to dock (or to hold if it came from there)
                         this.dragPiece.isDragging = false;
-                        this.animateReturn(this.dragPiece);
+                        if (!this.dockPieces.includes(this.dragPiece)) {
+                            // Came from hold, return to hold
+                            this.holdPiece = this.dragPiece;
+                            this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
+                            this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
+                        } else {
+                            this.animateReturn(this.dragPiece);
+                        }
                     }
                     this.dragPiece = null;
+                }
+            }
+
+            swapHold() {
+                AudioSys.play('hold');
+                const piece = this.dragPiece;
+                piece.isDragging = false;
+                piece.scale = 0.55; // Force small
+
+                if (this.holdPiece) {
+                    // Swap logic
+                    const oldHold = this.holdPiece;
+                    this.holdPiece = piece;
+                    
+                    // Put old hold into dock/hand
+                    // Since dragging is complex, let's put old hold back into the dock slot where dragPiece came from
+                    // OR if dragPiece came from hold (swapping back), just swap
+                    
+                    if (this.dockPieces.includes(piece)) {
+                        const idx = this.dockPieces.indexOf(piece);
+                        // Swap slots
+                        oldHold.x = piece.baseX;
+                        oldHold.y = piece.baseY;
+                        oldHold.baseX = piece.baseX;
+                        oldHold.baseY = piece.baseY;
+                        oldHold.slotX = piece.slotX;
+                        oldHold.slotY = piece.slotY;
+                        this.dockPieces[idx] = oldHold;
+                    } else {
+                        // Swapping hold with hold? Should not happen in drag logic easily, 
+                        // but if dropping hold onto hold, just reset.
+                    }
+                } else {
+                    // No piece in hold, just move dragPiece there
+                    this.holdPiece = piece;
+                    // Remove from dock
+                    const idx = this.dockPieces.indexOf(piece);
+                    if (idx > -1) this.dockPieces.splice(idx, 1);
+                }
+
+                // Check dock empty
+                if (this.dockPieces.length === 0) {
+                    // Slight delay before refill so it doesn't feel jarring
+                    setTimeout(() => {
+                        if (this.dockPieces.length === 0) this.spawnPieces();
+                    }, 200);
                 }
             }
 
@@ -703,6 +868,7 @@
             restart() {
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
                 this.dockPieces = [];
+                this.holdPiece = null;
                 this.score = 0;
                 this.dragPiece = null;
                 this.particles = [];
@@ -796,6 +962,7 @@
             }
 
             placePiece(piece, gridX, gridY) {
+                AudioSys.play('snap');
                 const targetX = this.boardLeft + (gridX) * this.cellSize; 
                 const targetY = this.boardTop + (gridY) * this.cellSize;
 
@@ -824,7 +991,15 @@
                         });
                     }, i * 35);
                 }
-                this.dockPieces = this.dockPieces.filter(p => p.slotX !== piece.slotX); 
+                
+                // If this piece came from dock, remove it
+                if (this.dockPieces.includes(piece)) {
+                    this.dockPieces = this.dockPieces.filter(p => p.slotX !== piece.slotX); 
+                }
+                // If came from hold, clear hold
+                if (this.holdPiece === piece) {
+                    this.holdPiece = null;
+                }
             }
 
             finishPlacement() {
@@ -877,6 +1052,7 @@
                 }
 
                 if (cellsToClear.size > 0) {
+                    AudioSys.play('clear');
                     this.isAnimating = true;
                     let finalClears = new Set();
                     cellsToClear.forEach(key => {
@@ -944,7 +1120,16 @@
 
             checkGameOver() {
                 if (this.isAnimating || this.dockPieces.length === 0 || this.isDying || this.isSpawning) return;
+                
+                // Also check if HOLD piece can be played (if it exists)
+                // Actually, if we have pieces in dock that CAN'T be played, but hold piece CAN, it's not game over.
+                // However, logic usually implies we only check if the current visible pieces are playable.
+                // The hold piece is "safe". 
+                // BUT: If the board is so full that NOTHING can be played (dock or hold), then game over.
+                
                 let canMove = false;
+                
+                // Check Dock
                 for (let piece of this.dockPieces) {
                     for (let x = 0; x < GRID_SIZE; x++) {
                         for (let y = 0; y < GRID_SIZE; y++) {
@@ -954,7 +1139,42 @@
                     }
                     if (canMove) break;
                 }
-                if (!canMove) this.startDeathAnimation();
+
+                // If dock is stuck, check if we have a hold piece that works
+                if (!canMove && this.holdPiece) {
+                     for (let x = 0; x < GRID_SIZE; x++) {
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            if (this.canPlace(this.holdPiece.shape, x, y)) { canMove = true; break; }
+                        }
+                        if (canMove) break;
+                    }
+                }
+                
+                // If no move possible and Hold is empty, player can still Swap a piece into hold to survive?
+                // Yes, if dock piece fits in hold (always true) and the retrieved hold piece fits.
+                // Simplified: If dock has moves, OK. If Hold has moves, OK. 
+                // If Dock stuck and Hold empty -> You can just hold a piece. So technically not Game Over unless dock piece doesn't fit in hold? (Always fits).
+                // So Game Over is strictly when:
+                // 1. Dock pieces cannot be placed.
+                // 2. AND (Hold is empty OR Hold piece cannot be placed).
+                // 3. AND (If Hold is empty, does holding a dock piece help? No, it just delays).
+                
+                if (!canMove) {
+                    // One last check: if hold is empty, we can technically "move" by holding a piece.
+                    // But if that piece doesn't fit anywhere later, we are still dead. 
+                    // Let's stick to: if current pieces can't be placed, die.
+                    // Except if hold is empty, we allow storing one to see if next random pieces help? 
+                    // No, pieces don't spawn until dock empty.
+                    
+                    // Simple Rule: If you can't place any current visible piece (Dock or Hold), Game Over.
+                    // Exception: If hold is empty, you can place a dock piece there. So you are not dead yet.
+                    if (this.holdPiece === null && this.dockPieces.length > 0) {
+                        return; // Not dead, can hold
+                    }
+                    
+                    AudioSys.play('gameover');
+                    this.startDeathAnimation();
+                }
             }
 
             startDeathAnimation() {
@@ -1006,6 +1226,7 @@
                     if(this.shake < 0.5) this.shake = 0;
                 }
 
+                // Draw Grid
                 this.ctx.fillStyle = '#dfe4ea';
                 this.ctx.fillRect(this.boardLeft - 5, this.boardTop - 5, (GRID_SIZE * this.cellSize) + 10, (GRID_SIZE * this.cellSize) + 10);
 
@@ -1018,6 +1239,35 @@
                     }
                 }
 
+                // Draw Hold Zone
+                if (this.holdZone) {
+                    this.drawRoundedRect(this.holdZone.x, this.holdZone.y, this.holdZone.w, 'rgba(0,0,0,0.05)', true);
+                    // Text label "HOLD"
+                    this.ctx.fillStyle = "rgba(0,0,0,0.2)";
+                    this.ctx.font = "bold 10px sans-serif";
+                    this.ctx.textAlign = "center";
+                    this.ctx.fillText("HOLD", this.holdZone.x + this.holdZone.w/2, this.holdZone.y - 5);
+
+                    if (this.holdPiece) {
+                        // Draw Held Piece Centered
+                        const cx = this.holdZone.x + this.holdZone.w/2;
+                        const cy = this.holdZone.y + this.holdZone.h/2;
+                        // Calculate offset to center the shape
+                        // Shape visual size is roughly 0.55 * cellSize * dims
+                        const shapeW = this.holdPiece.w * 0.4; // Smaller in hold
+                        const shapeH = this.holdPiece.h * 0.4;
+                        const startX = cx - shapeW/2;
+                        const startY = cy - shapeH/2;
+
+                        for (let block of this.holdPiece.shape) {
+                            let bx = startX + (block[0] * this.cellSize * 0.4);
+                            let by = startY + (block[1] * this.cellSize * 0.4);
+                            this.drawRoundedRect(bx, by, this.cellSize * 0.4, this.holdPiece.color, true);
+                        }
+                    }
+                }
+
+                // Draw Placing Blocks
                 for (let i = this.placingBlocks.length - 1; i >= 0; i--) {
                     let b = this.placingBlocks[i];
                     b.progress += 0.08; 
@@ -1030,6 +1280,7 @@
                     if(b.progress === 1) { b.onFinish(); this.placingBlocks.splice(i, 1); }
                 }
 
+                // Draw Clears
                 if (this.clearingCells.size > 0) {
                     this.ctx.save();
                     this.clearingCells.forEach(key => {
@@ -1041,6 +1292,7 @@
                     this.ctx.restore();
                 }
 
+                // Particles
                 for(let i = this.particles.length - 1; i >= 0; i--) {
                     let p = this.particles[i];
                     p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
@@ -1058,6 +1310,7 @@
                     }
                 }
 
+                // Dragging Piece Shadow & Piece
                 if (this.dragPiece && !this.isAnimating) {
                     this.ctx.globalAlpha = 0.5;
                     this.ctx.fillStyle = 'rgba(0,0,0,0.1)';
@@ -1086,6 +1339,7 @@
                     }
                 }
 
+                // Dock Pieces
                 if (!this.isDying) {
                     for (let piece of this.dockPieces) {
                         if(piece.isDragging) continue;
@@ -1111,12 +1365,14 @@
 
                 this.ctx.restore(); 
 
+                // Flash Effect
                 if(this.flashAlpha > 0) {
                     this.ctx.fillStyle = `rgba(255,255,255,${this.flashAlpha})`;
                     this.ctx.fillRect(0, 0, this.width, this.height);
                     this.flashAlpha -= 0.05;
                 }
 
+                // Floating Texts
                 for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
                     let t = this.floatingTexts[i];
                     t.y += t.velocityY; t.life -= 0.01;
@@ -1151,16 +1407,7 @@
                 let finalX = x + gap;
                 let finalY = y + gap;
                 this.ctx.beginPath();
-                this.ctx.moveTo(finalX + radius, finalY);
-                this.ctx.lineTo(finalX + s - radius, finalY);
-                this.ctx.quadraticCurveTo(finalX + s, finalY, finalX + s, finalY + radius);
-                this.ctx.lineTo(finalX + s, finalY + s - radius);
-                this.ctx.quadraticCurveTo(finalX + s, finalY + s, finalX + s - radius, finalY + s);
-                this.ctx.lineTo(finalX + radius, finalY + s);
-                this.ctx.quadraticCurveTo(finalX, finalY + s, finalX, finalY + s - radius);
-                this.ctx.lineTo(finalX, finalY + radius);
-                this.ctx.quadraticCurveTo(finalX, finalY, finalX + radius, finalY);
-                this.ctx.closePath();
+                this.ctx.roundRect(finalX, finalY, s, s, radius);
                 this.ctx.fill();
             }
 
