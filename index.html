@@ -43,7 +43,8 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             z-index: 20;
         }
 
@@ -1122,7 +1123,10 @@
                 }
                 
                 if (!canMove) {
-                    if (this.holdPiece === null && this.dockPieces.length > 0) {
+                    // CHANGED LOGIC HERE: 
+                    // Only save the player if Hold is empty AND they have exactly 1 piece left.
+                    // This allows them to move that last piece to hold to trigger a respawn.
+                    if (this.holdPiece === null && this.dockPieces.length === 1) {
                         return; 
                     }
                     AudioSys.play('gameover');
