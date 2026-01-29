@@ -19,7 +19,6 @@
             --text-color: #2f3542;
             --primary: #3742fa;
             --accent: #ff4757;
-            --warning: #fba92c;
         }
 
         body {
@@ -39,15 +38,12 @@
             transition: background-color 0.1s linear;
         }
 
-        /* LAYOUT & LAYERS */
+        /* UI LAYERS */
         .ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             z-index: 20;
         }
 
@@ -60,16 +56,11 @@
         #abandon-modal { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 400; }
 
         .menu-container {
-            padding: 30px 40px;
-            border-radius: 30px;
-            text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            padding: 30px 40px; border-radius: 30px;
+            text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.15);
-            max-width: 95%; max-height: 98vh;
-            width: 400px;
-            overflow-y: auto; overflow-x: hidden;
-            box-sizing: border-box;
-            background: white;
+            max-width: 95%; max-height: 98vh; width: 400px;
+            overflow-y: auto; overflow-x: hidden; box-sizing: border-box; background: white;
         }
 
         .start-container {
@@ -79,22 +70,17 @@
         }
 
         .big-logo {
-            width: 100px; height: 100px; 
-            background: white; border-radius: 24px; 
+            width: 100px; height: 100px; background: white; border-radius: 24px; 
             color: var(--accent); font-weight: 900; font-size: 4.5rem; 
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            animation: float 4s ease-in-out infinite;
-            margin-bottom: 10px;
+            animation: float 4s ease-in-out infinite; margin-bottom: 10px;
         }
 
         #username-input { 
-            background: rgba(255,255,255,0.2); 
-            border: 3px solid rgba(255,255,255,0.4); 
-            padding: 20px 30px; color: white; font-size: 24px; 
-            border-radius: 60px; outline: none; width: 280px; 
-            text-align: center; font-weight: 800; letter-spacing: 1px;
-            transition: 0.3s;
+            background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4); 
+            padding: 20px 30px; color: white; font-size: 24px; border-radius: 60px; outline: none; width: 280px; 
+            text-align: center; font-weight: 800; letter-spacing: 1px; transition: 0.3s;
             pointer-events: auto; user-select: text; -webkit-user-select: text; 
         }
         #username-input:focus { background: rgba(255,255,255,0.3); border-color: white; transform: scale(1.05); }
@@ -104,39 +90,27 @@
             width: 45px; height: 45px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: 900; font-size: 1.6rem;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1); animation: float 3s ease-in-out infinite;
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
         .online-lb { 
-            width: 100%; 
-            background: rgba(0,0,0,0.04); 
-            border-radius: 24px; padding: 20px; 
-            border: 2px solid rgba(0,0,0,0.05); 
-            margin-bottom: 20px; box-sizing: border-box;
-            min-height: 250px;
+            width: 100%; background: rgba(0,0,0,0.04); 
+            border-radius: 24px; padding: 20px; border: 2px solid rgba(0,0,0,0.05); 
+            margin-bottom: 20px; box-sizing: border-box; min-height: 250px;
             display: flex; flex-direction: column;
         }
         .dark-lb { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.2); color: white; }
         
-        .lb-header { 
-            text-align: center; font-size: 16px; letter-spacing: 2px; 
-            font-weight: 900; margin-bottom: 15px; opacity: 0.7; text-transform: uppercase;
-        }
+        .lb-header { text-align: center; font-size: 16px; letter-spacing: 2px; font-weight: 900; margin-bottom: 15px; opacity: 0.7; text-transform: uppercase; }
         .lb-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .lb-row { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 5px; font-size: 18px; 
-            border-bottom: 2px solid rgba(0,0,0,0.06); 
-        }
+        .lb-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; font-size: 18px; border-bottom: 2px solid rgba(0,0,0,0.06); }
         .dark-lb .lb-row { border-bottom: 2px solid rgba(255,255,255,0.15); }
         .lb-row:last-child { border: none; }
         
         .lb-left { display: flex; align-items: center; gap: 10px; }
         .lb-rank {
-            background: var(--accent); color: white;
-            font-weight: 900; font-size: 14px;
+            background: var(--accent); color: white; font-weight: 900; font-size: 14px;
             width: 28px; height: 28px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
@@ -159,10 +133,8 @@
         .btn-white { background: white; color: var(--accent); }
 
         .btn-install {
-            background: rgba(255,255,255,0.2); 
-            color: white; padding: 15px 30px; font-size: 1rem; 
-            display: flex; align-items: center; gap: 10px;
-            margin-top: 10px; border: 1px solid rgba(255,255,255,0.4); box-shadow: none;
+            background: rgba(255,255,255,0.2); color: white; padding: 15px 30px; font-size: 1rem; 
+            display: flex; align-items: center; gap: 10px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.4); box-shadow: none;
         }
 
         .header {
@@ -170,23 +142,31 @@
             display: flex; justify-content: space-between; align-items: center;
             pointer-events: none; z-index: 5;
         }
-        /* LOGO INTERACTIVITY */
+        
         .mini-logo {
             width: 55px; height: 55px; background: var(--accent);
             border-radius: 14px; color: white; font-weight: 900; font-size: 2rem;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 6px 18px rgba(255, 71, 87, 0.4);
-            animation: float 4s ease-in-out infinite;
-            pointer-events: auto; cursor: pointer;
+            animation: float 4s ease-in-out infinite; pointer-events: auto; cursor: pointer;
         }
         .score-box {
             background: white; padding: 12px 35px; border-radius: 35px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             font-weight: 800; font-size: 1.8rem; color: var(--primary);
-            transition: transform 0.1s;
-            min-width: 80px; text-align: center;
+            transition: transform 0.1s; min-width: 80px; text-align: center;
         }
         .score-pop { transform: scale(1.3); color: var(--accent); }
+        
+        /* UNDO BUTTON IN HEADER */
+        .header-icon-btn {
+            width: 55px; height: 55px; background: white; border-radius: 14px;
+            border: none; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1); cursor: pointer; 
+            color: var(--text-color); pointer-events: auto; transition: 0.2s;
+        }
+        .header-icon-btn:active { transform: scale(0.9); }
+        .header-icon-btn.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
 
         /* Install Modal */
         #install-modal {
@@ -271,7 +251,9 @@
         <div class="header">
             <div class="mini-logo" onclick="openAbandon()">M</div>
             <div class="score-box" id="scoreBox">0</div>
-            <div style="width:55px;"></div> 
+            <button class="header-icon-btn disabled" id="undoBtn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+            </button>
         </div>
     </div>
 
@@ -334,11 +316,9 @@
                 const gain = this.ctx.createGain();
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
-
                 const now = this.ctx.currentTime;
                 
                 if (type === 'pop') {
-                    // Pick up sound
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(400, now);
                     osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
@@ -347,7 +327,6 @@
                     osc.start(now);
                     osc.stop(now + 0.1);
                 } else if (type === 'snap') {
-                    // Place sound
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(200, now);
                     osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
@@ -356,7 +335,6 @@
                     osc.start(now);
                     osc.stop(now + 0.1);
                 } else if (type === 'hold') {
-                    // Hold sound (swish)
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(600, now);
                     osc.frequency.exponentialRampToValueAtTime(300, now + 0.15);
@@ -365,10 +343,8 @@
                     osc.start(now);
                     osc.stop(now + 0.15);
                 } else if (type === 'clear') {
-                    // Clear/Combo sound
                     osc.type = 'sine';
-                    // Chord
-                    const freqs = [523.25, 659.25, 783.99]; // C Major
+                    const freqs = [523.25, 659.25, 783.99]; 
                     freqs.forEach((f, i) => {
                         const o = this.ctx.createOscillator();
                         const g = this.ctx.createGain();
@@ -419,23 +395,8 @@
                 const scores = parseData(text);
                 if (scores) { render(scores); return; }
             } catch (e) {}
-
-            try {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(dreamloURL)}&t=${Date.now()}`;
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                if (data && data.contents) {
-                    const scores = parseData(data.contents);
-                    if (scores) { render(scores); return; }
-                }
-            } catch (e) {}
             
             if(hasLoadedLB) updateOnlineLB(currentLeaderboard);
-            else {
-                const offlineHtml = '<div style="text-align:center; opacity:0.5;">Offline mode</div>';
-                document.getElementById('main-lb-list').innerHTML = offlineHtml;
-                document.getElementById('death-lb-list').innerHTML = offlineHtml;
-            }
         }
 
         setInterval(fetchLeaderboard, 5000); // 5s refresh
@@ -515,7 +476,7 @@
         };
 
         window.enterMainMenu = () => {
-            AudioSys.init(); // Init Audio Context
+            AudioSys.init(); 
             const input = document.getElementById('username-input');
             const val = input.value.trim();
             if (val) myName = val;
@@ -525,7 +486,6 @@
             document.getElementById('main-menu').classList.add('active-layer');
         };
 
-        // GLOBAL HELPER TO TRIGGER ABANDON
         window.openAbandon = () => {
             if(window.gameInstance) window.gameInstance.requestAbandon();
         };
@@ -556,16 +516,18 @@
                     gameOver: document.getElementById('death-screen'),
                     scoreBox: document.getElementById('scoreBox'),
                     finalScore: document.getElementById('finalScore'),
-                    abandon: document.getElementById('abandon-modal')
+                    abandon: document.getElementById('abandon-modal'),
+                    undoBtn: document.getElementById('undoBtn')
                 };
 
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
                 this.dockPieces = [];
-                this.holdPiece = null; // HOLD FEATURE
+                this.holdPiece = null; 
                 this.particles = [];
                 this.floatingTexts = [];
                 this.placingBlocks = [];
                 this.clearingCells = new Set();
+                this.history = null; // For Undo
                 
                 this.score = 0;
                 this.dragPiece = null;
@@ -589,10 +551,11 @@
                 this.setupInput();
 
                 document.getElementById('startBtn').addEventListener('click', () => {
-                    AudioSys.init(); // Ensure audio context triggers on click
+                    AudioSys.init(); 
                     this.startGame();
                 });
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
+                this.ui.undoBtn.addEventListener('click', () => this.performUndo());
 
                 // Abandon Handlers
                 document.getElementById('btn-stay').addEventListener('click', () => {
@@ -625,25 +588,35 @@
                 const maxWidth = Math.min(window.innerWidth * 0.95, 500);
                 this.width = maxWidth;
                 this.cellSize = (this.width - 40) / GRID_SIZE; 
+                this.boardTop = 30;
+                this.boardLeft = 20;
+
+                // --- NEW LAYOUT CALCULATION ---
+                // 1. Board Top
+                // 2. Board Grid
+                const gridHeight = GRID_SIZE * this.cellSize;
+                
+                // 3. Hold Zone (Below Board)
+                const holdSize = this.cellSize * 2.2; // Larger Hold
+                this.holdZone = {
+                    w: holdSize,
+                    h: holdSize,
+                    x: (this.width - holdSize) / 2, // Centered
+                    y: this.boardTop + gridHeight + 25 // 25px gap below board
+                };
+
+                // 4. Dock (Below Hold)
+                this.dockY = this.holdZone.y + this.holdZone.h + 20; // 20px gap below hold
                 this.dockHeight = this.cellSize * 5;
-                this.height = this.width + this.dockHeight;
+
+                // Total Height
+                this.height = this.dockY + this.cellSize * 3.5; // Enough room for pieces
 
                 this.canvas.width = this.width * 2; 
                 this.canvas.height = this.height * 2;
                 this.canvas.style.width = `${this.width}px`;
                 this.canvas.style.height = `${this.height}px`;
                 this.ctx.scale(2, 2);
-
-                this.boardTop = 30;
-                this.boardLeft = 20;
-
-                // Define Hold Zone (Top Right)
-                this.holdZone = {
-                    x: this.width - 70,
-                    y: 30,
-                    w: 55,
-                    h: 55
-                };
             }
 
             setupInput() {
@@ -679,22 +652,17 @@
                 this.pointer.y = pos.y;
                 this.pointer.isDown = true;
 
-                // Check Hold Zone Click (to swap out if no drag)
+                // Check Hold Zone Click
                 if (this.holdPiece && 
                     pos.x > this.holdZone.x && pos.x < this.holdZone.x + this.holdZone.w &&
                     pos.y > this.holdZone.y && pos.y < this.holdZone.y + this.holdZone.h) {
                     
-                    // Simple logic: if click hold zone, try to swap with nothing (bring it out)
-                    // But standard UI is drag hold piece out or swap.
-                    // Let's implement Drag from Hold
                     this.dragPiece = this.holdPiece;
                     this.dragPiece.isDragging = true;
-                    // Center it
                     this.dragOffset.x = -(this.dragPiece.w / 2);
                     this.dragOffset.y = -(this.dragPiece.h / 2);
                     if (e.touches) this.dragOffset.y -= 80;
                     
-                    // Temporarily remove from hold to drag it
                     this.holdPiece = null;
                     AudioSys.play('pop');
                     return;
@@ -754,8 +722,8 @@
                     const centerPy = this.dragPiece.y + this.dragPiece.h/2;
 
                     // CHECK HOLD ZONE DROP
-                    if (centerPx > this.holdZone.x - 20 && centerPx < this.holdZone.x + this.holdZone.w + 20 &&
-                        centerPy > this.holdZone.y - 20 && centerPy < this.holdZone.y + this.holdZone.h + 20) {
+                    if (centerPx > this.holdZone.x && centerPx < this.holdZone.x + this.holdZone.w &&
+                        centerPy > this.holdZone.y && centerPy < this.holdZone.y + this.holdZone.h) {
                         
                         this.swapHold();
                         this.dragPiece = null;
@@ -764,6 +732,7 @@
 
                     const snap = this.getSnapCoordinates(this.dragPiece);
                     if (this.canPlace(this.dragPiece.shape, snap.gridX, snap.gridY)) {
+                        this.saveState(); // Save before move for Undo
                         this.placePiece(this.dragPiece, snap.gridX, snap.gridY);
                     } else {
                         // Return to dock (or to hold if it came from there)
@@ -781,46 +750,85 @@
                 }
             }
 
+            saveState() {
+                // Deep copy grid and score
+                this.history = {
+                    grid: JSON.parse(JSON.stringify(this.grid)),
+                    score: this.score,
+                    holdPiece: this.holdPiece ? {...this.holdPiece} : null,
+                    dockPieces: this.dockPieces.map(p => ({...p})) 
+                    // Note: Dock pieces refs will break on restore, but logic handles regeneration usually. 
+                    // Here we just restore data.
+                };
+                this.ui.undoBtn.classList.remove('disabled');
+            }
+
+            performUndo() {
+                if(!this.history) return;
+                
+                this.grid = JSON.parse(JSON.stringify(this.history.grid));
+                this.score = this.history.score;
+                this.ui.scoreBox.innerText = this.score;
+                
+                // Restore Hold
+                this.holdPiece = this.history.holdPiece;
+                if(this.holdPiece) {
+                    // Recenter hold piece visually
+                    this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
+                    this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
+                    this.holdPiece.scale = 0.55;
+                }
+
+                // Restore Dock
+                this.dockPieces = this.history.dockPieces.map(p => {
+                    return {
+                        ...p,
+                        x: p.baseX, y: p.baseY, // Reset to base pos
+                        scale: 0.55, isDragging: false
+                    };
+                });
+
+                this.history = null;
+                this.ui.undoBtn.classList.add('disabled');
+                AudioSys.play('pop');
+            }
+
             swapHold() {
+                this.saveState(); // Undoable
                 AudioSys.play('hold');
                 const piece = this.dragPiece;
                 piece.isDragging = false;
-                piece.scale = 0.55; // Force small
+                piece.scale = 0.55; 
 
                 if (this.holdPiece) {
-                    // Swap logic
+                    // Swap
                     const oldHold = this.holdPiece;
                     this.holdPiece = piece;
                     
-                    // Put old hold into dock/hand
-                    // Since dragging is complex, let's put old hold back into the dock slot where dragPiece came from
-                    // OR if dragPiece came from hold (swapping back), just swap
-                    
                     if (this.dockPieces.includes(piece)) {
                         const idx = this.dockPieces.indexOf(piece);
-                        // Swap slots
+                        // Move old hold to dock
                         oldHold.x = piece.baseX;
                         oldHold.y = piece.baseY;
                         oldHold.baseX = piece.baseX;
                         oldHold.baseY = piece.baseY;
                         oldHold.slotX = piece.slotX;
                         oldHold.slotY = piece.slotY;
+                        oldHold.scale = 0.55;
                         this.dockPieces[idx] = oldHold;
-                    } else {
-                        // Swapping hold with hold? Should not happen in drag logic easily, 
-                        // but if dropping hold onto hold, just reset.
                     }
                 } else {
-                    // No piece in hold, just move dragPiece there
+                    // Empty hold
                     this.holdPiece = piece;
-                    // Remove from dock
                     const idx = this.dockPieces.indexOf(piece);
                     if (idx > -1) this.dockPieces.splice(idx, 1);
                 }
 
-                // Check dock empty
+                // Center new hold piece
+                this.holdPiece.x = this.holdZone.x + (this.holdZone.w - this.holdPiece.w*0.55)/2;
+                this.holdPiece.y = this.holdZone.y + (this.holdZone.h - this.holdPiece.h*0.55)/2;
+
                 if (this.dockPieces.length === 0) {
-                    // Slight delay before refill so it doesn't feel jarring
                     setTimeout(() => {
                         if (this.dockPieces.length === 0) this.spawnPieces();
                     }, 200);
@@ -875,6 +883,8 @@
                 this.floatingTexts = [];
                 this.placingBlocks = [];
                 this.clearingCells.clear();
+                this.history = null;
+                this.ui.undoBtn.classList.add('disabled');
                 this.isDying = false;
                 this.isSpawning = false;
                 this.targetRGB = [240, 242, 245];
@@ -887,7 +897,6 @@
             spawnPieces() {
                 this.isSpawning = true;
                 this.dockPieces = [];
-                const dockY = this.boardTop + (GRID_SIZE * this.cellSize) + (this.dockHeight * 0.5); 
                 const slotWidth = this.width / 3;
 
                 for (let i = 0; i < 3; i++) {
@@ -907,17 +916,20 @@
                         const slotCenterX = (i * slotWidth) + (slotWidth / 2) + 15;
                         const visualW = shapeW * 0.55;
                         const visualH = shapeH * 0.55;
+                        
                         let baseX = slotCenterX - (visualW / 2);
                         if (baseX < 15) baseX = 15;
                         if (baseX + visualW > this.width - 15) baseX = this.width - visualW - 15;
-                        const baseY = dockY - (visualH / 2);
+                        
+                        // Spawn relative to new dockY
+                        const baseY = this.dockY + (this.cellSize * 1.5) - (visualH / 2);
 
                         this.dockPieces.push({
                             shape: shapeDef, color: color,
                             x: baseX, y: baseY,
                             baseX: baseX, baseY: baseY,
                             w: shapeW, h: shapeH, 
-                            slotX: slotCenterX, slotY: dockY, 
+                            slotX: slotCenterX, slotY: this.dockY + (this.cellSize * 1.5), 
                             scale: 0, targetScale: 0.55, isDragging: false 
                         });
 
@@ -992,11 +1004,9 @@
                     }, i * 35);
                 }
                 
-                // If this piece came from dock, remove it
                 if (this.dockPieces.includes(piece)) {
                     this.dockPieces = this.dockPieces.filter(p => p.slotX !== piece.slotX); 
                 }
-                // If came from hold, clear hold
                 if (this.holdPiece === piece) {
                     this.holdPiece = null;
                 }
@@ -1121,12 +1131,6 @@
             checkGameOver() {
                 if (this.isAnimating || this.dockPieces.length === 0 || this.isDying || this.isSpawning) return;
                 
-                // Also check if HOLD piece can be played (if it exists)
-                // Actually, if we have pieces in dock that CAN'T be played, but hold piece CAN, it's not game over.
-                // However, logic usually implies we only check if the current visible pieces are playable.
-                // The hold piece is "safe". 
-                // BUT: If the board is so full that NOTHING can be played (dock or hold), then game over.
-                
                 let canMove = false;
                 
                 // Check Dock
@@ -1140,7 +1144,7 @@
                     if (canMove) break;
                 }
 
-                // If dock is stuck, check if we have a hold piece that works
+                // Check Hold (if exists)
                 if (!canMove && this.holdPiece) {
                      for (let x = 0; x < GRID_SIZE; x++) {
                         for (let y = 0; y < GRID_SIZE; y++) {
@@ -1150,26 +1154,10 @@
                     }
                 }
                 
-                // If no move possible and Hold is empty, player can still Swap a piece into hold to survive?
-                // Yes, if dock piece fits in hold (always true) and the retrieved hold piece fits.
-                // Simplified: If dock has moves, OK. If Hold has moves, OK. 
-                // If Dock stuck and Hold empty -> You can just hold a piece. So technically not Game Over unless dock piece doesn't fit in hold? (Always fits).
-                // So Game Over is strictly when:
-                // 1. Dock pieces cannot be placed.
-                // 2. AND (Hold is empty OR Hold piece cannot be placed).
-                // 3. AND (If Hold is empty, does holding a dock piece help? No, it just delays).
-                
                 if (!canMove) {
-                    // One last check: if hold is empty, we can technically "move" by holding a piece.
-                    // But if that piece doesn't fit anywhere later, we are still dead. 
-                    // Let's stick to: if current pieces can't be placed, die.
-                    // Except if hold is empty, we allow storing one to see if next random pieces help? 
-                    // No, pieces don't spawn until dock empty.
-                    
-                    // Simple Rule: If you can't place any current visible piece (Dock or Hold), Game Over.
-                    // Exception: If hold is empty, you can place a dock piece there. So you are not dead yet.
+                    // Not dead if can hold a dock piece (and hold is empty)
                     if (this.holdPiece === null && this.dockPieces.length > 0) {
-                        return; // Not dead, can hold
+                        return; 
                     }
                     
                     AudioSys.play('gameover');
@@ -1179,6 +1167,7 @@
 
             startDeathAnimation() {
                 this.isDying = true;
+                this.ui.undoBtn.classList.add('disabled');
                 for (let y = 0; y < GRID_SIZE; y++) {
                     setTimeout(() => {
                         for (let x = 0; x < GRID_SIZE; x++) {
@@ -1239,30 +1228,38 @@
                     }
                 }
 
-                // Draw Hold Zone
+                // --- DRAW LARGE CENTER HOLD ZONE ---
                 if (this.holdZone) {
-                    this.drawRoundedRect(this.holdZone.x, this.holdZone.y, this.holdZone.w, 'rgba(0,0,0,0.05)', true);
-                    // Text label "HOLD"
-                    this.ctx.fillStyle = "rgba(0,0,0,0.2)";
-                    this.ctx.font = "bold 10px sans-serif";
-                    this.ctx.textAlign = "center";
-                    this.ctx.fillText("HOLD", this.holdZone.x + this.holdZone.w/2, this.holdZone.y - 5);
+                    // Frame
+                    this.ctx.shadowColor = "rgba(0,0,0,0.1)";
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowOffsetY = 5;
+                    this.drawRoundedRect(this.holdZone.x, this.holdZone.y, this.holdZone.w, 'white', true, false);
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.shadowOffsetY = 0;
 
+                    // Text
+                    if(!this.holdPiece) {
+                        this.ctx.fillStyle = "rgba(0,0,0,0.15)";
+                        this.ctx.font = "bold 14px sans-serif";
+                        this.ctx.textAlign = "center";
+                        this.ctx.fillText("HOLD", this.holdZone.x + this.holdZone.w/2, this.holdZone.y + this.holdZone.h/2 + 5);
+                    }
+
+                    // Piece
                     if (this.holdPiece) {
-                        // Draw Held Piece Centered
                         const cx = this.holdZone.x + this.holdZone.w/2;
                         const cy = this.holdZone.y + this.holdZone.h/2;
-                        // Calculate offset to center the shape
-                        // Shape visual size is roughly 0.55 * cellSize * dims
-                        const shapeW = this.holdPiece.w * 0.4; // Smaller in hold
-                        const shapeH = this.holdPiece.h * 0.4;
+                        
+                        const shapeW = this.holdPiece.w * 0.45; 
+                        const shapeH = this.holdPiece.h * 0.45;
                         const startX = cx - shapeW/2;
                         const startY = cy - shapeH/2;
 
                         for (let block of this.holdPiece.shape) {
-                            let bx = startX + (block[0] * this.cellSize * 0.4);
-                            let by = startY + (block[1] * this.cellSize * 0.4);
-                            this.drawRoundedRect(bx, by, this.cellSize * 0.4, this.holdPiece.color, true);
+                            let bx = startX + (block[0] * this.cellSize * 0.45);
+                            let by = startY + (block[1] * this.cellSize * 0.45);
+                            this.drawRoundedRect(bx, by, this.cellSize * 0.45, this.holdPiece.color, true);
                         }
                     }
                 }
@@ -1355,9 +1352,7 @@
                         for (let block of piece.shape) {
                             let bx = piece.x + (block[0] * this.cellSize * 0.55); 
                             let by = piece.y + (block[1] * this.cellSize * 0.55);
-                            
                             let s = this.cellSize * 0.55 * (piece.scale / 0.55);
-                            
                             this.drawRoundedRect(bx, by, s, piece.color, true);
                         }
                     }
