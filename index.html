@@ -812,88 +812,35 @@
             },
             {
                 title: "Chain Reaction",
-                desc: "When a line clears, it pops ALL connected blocks of the same color!",
+                desc: "Popped blocks trigger neighbors of the same color!",
                 html: createGridHTML([
-                    // Vertical Line (Trigger) - Missing the one at 4,4 initially
-                    {x:4, y:2, cls:'c-red'}, {x:4, y:3, cls:'c-red'}, {x:4, y:5, cls:'c-red'},
-                    // Connected Neighbors (The "Chain")
-                    {x:3, y:4, cls:'c-red'}, {x:2, y:4, cls:'c-red'}, // Left arm
-                    {x:5, y:4, cls:'c-red'}, {x:6, y:4, cls:'c-red'}, // Right arm
-                    {x:4, y:6, cls:'c-red'}, // Bottom tail
-                    // Noise (Other colors that stay)
-                    {x:3, y:3, cls:'c-blue'}, {x:5, y:3, cls:'c-blue'},
-                    {x:3, y:5, cls:'c-green'}, {x:5, y:5, cls:'c-yellow'},
-                    {x:2, y:3, cls:'c-purple'}, {x:6, y:5, cls:'c-purple'}
+                    {x:4, y:3, cls:'c-red'}, {x:4, y:5, cls:'c-red'},
+                    {x:3, y:4, cls:'c-red'}, {x:5, y:4, cls:'c-red'},
+                    {x:3, y:3, cls:'c-red'}, {x:5, y:5, cls:'c-red'},
+                    {x:0, y:0, cls:'c-blue'}
                 ], false, 'chain') + `<div id="hand-chain" class="hand-cursor" style="top:100%; left:45%;"></div>`,
                 setup: () => {
                     const hand = document.getElementById('hand-chain');
                     const cycle = () => {
-                        // 1. Reset
+                        // Reset
                         document.querySelectorAll('#mgrid-chain .m-cell').forEach(el => el.classList.remove('pop-anim'));
                         document.getElementById('c-4-4-chain').classList.remove('c-red');
                         hand.style.top = '100%'; hand.style.opacity = '1';
 
-                        // 2. Move Hand
                         setTimeout(() => { hand.style.top = '45%'; }, 100);
-
-                        // 3. Place Block (Trigger)
                         setTimeout(() => {
                             document.getElementById('c-4-4-chain').classList.add('c-red');
                             hand.style.opacity = '0';
                         }, 600);
-
-                        // 4. Pop The Line (Vertical)
                         setTimeout(() => {
-                            ['c-4-2-chain','c-4-3-chain','c-4-4-chain','c-4-5-chain'].forEach(id => {
-                                document.getElementById(id).classList.add('pop-anim');
-                            });
+                            ['c-4-4-chain','c-4-3-chain','c-4-5-chain','c-3-4-chain','c-5-4-chain'].forEach(id=>document.getElementById(id).classList.add('pop-anim'));
                         }, 1000);
-
-                        // 5. Chain Reaction (Neighbors)
                         setTimeout(() => {
-                            ['c-3-4-chain','c-2-4-chain','c-5-4-chain','c-6-4-chain','c-4-6-chain'].forEach(id => {
-                                document.getElementById(id).classList.add('pop-anim');
-                            });
+                            ['c-3-3-chain','c-5-5-chain'].forEach(id=>document.getElementById(id).classList.add('pop-anim'));
                         }, 1200);
                     };
                     cycle();
-                    tutInterval = setInterval(cycle, 3000);
-                },
-                teardown: () => clearInterval(tutInterval)
-            },
-            {
-                title: "Hold Zone",
-                desc: "Drag a piece to the HOLD box to save it for later.",
-                html: `<div class="hold-demo"><div class="hold-piece" id="anim-hold-piece"><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div></div></div>`,
-                setup: () => {
-                    const p = document.getElementById('anim-hold-piece');
-                    const cycle = () => {
-                        p.style.transform = 'translate(0, 100px) scale(1.2)';
-                        p.style.opacity = '0';
-                        setTimeout(() => {
-                            p.style.opacity = '1';
-                            p.style.transform = 'translate(0, 0) scale(1)';
-                        }, 500);
-                    };
-                    cycle();
-                    tutInterval = setInterval(cycle, 2000);
-                },
-                teardown: () => clearInterval(tutInterval)
-            },
-            {
-                title: "Multipliers",
-                desc: "Clear multiple lines at once to get massive score multipliers.",
-                html: `<div class="pulse-text" id="mult-text" style="font-size:3rem; font-weight:900; color:#f1c40f; text-shadow: 0 5px 15px rgba(0,0,0,0.1);">MEGA!</div>`,
-                setup: () => {
-                    const txt = document.getElementById('mult-text');
-                    const words = ["DOUBLE!", "TRIPLE!", "MEGA!"];
-                    const colors = ["#ffa502", "#ff6348", "#2ed573"];
-                    let idx = 0;
-                    tutInterval = setInterval(() => {
-                        idx = (idx + 1) % 3;
-                        txt.innerText = words[idx];
-                        txt.style.color = colors[idx];
-                    }, 1000);
+                    tutInterval = setInterval(cycle, 2800);
                 },
                 teardown: () => clearInterval(tutInterval)
             }
