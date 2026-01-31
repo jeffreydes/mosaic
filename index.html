@@ -55,6 +55,7 @@
         #main-menu { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); z-index: 200; }
         #death-screen { background: var(--accent); z-index: 250; }
         #abandon-modal { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 400; }
+        #tutorial-layer { z-index: 350; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
 
         .menu-container {
             padding: 30px 40px; border-radius: 30px;
@@ -64,6 +65,59 @@
             overflow-y: auto; overflow-x: hidden; box-sizing: border-box; background: white;
         }
 
+        /* TUTORIAL STYLES */
+        #tutorial-prompt {
+            background: var(--accent);
+            color: white;
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 360; pointer-events: auto;
+        }
+
+        .tut-card {
+            background: white; width: 90%; max-width: 400px;
+            border-radius: 30px; padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; pointer-events: auto;
+            color: var(--text-color);
+        }
+
+        .tut-img-box {
+            width: 100%; height: 180px; background: #f1f2f6; border-radius: 20px;
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+
+        .tut-title { font-size: 1.8rem; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
+        .tut-desc { font-size: 1.1rem; line-height: 1.5; color: #555; margin-bottom: 20px; font-weight: 500; }
+
+        .tut-nav {
+            display: flex; justify-content: space-between; width: 100%; margin-top: 10px;
+        }
+
+        .nav-btn {
+            width: 60px; height: 60px; border-radius: 50%; border: none;
+            background: var(--bg-color); color: var(--text-color);
+            font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .nav-btn:active { transform: scale(0.9); }
+        .nav-btn.finish { background: var(--accent); color: white; width: auto; padding: 0 30px; border-radius: 30px; font-weight: 800; font-size: 1.2rem;}
+
+        /* CSS Graphics for Tutorial */
+        .mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+        .mini-cell { width: 20px; height: 20px; background: #dfe4ea; border-radius: 4px; }
+        .c-red { background: #ff6b6b; }
+        .c-blue { background: #54a0ff; }
+        .c-ghost { background: rgba(0,0,0,0.1); border: 2px dashed #999; box-sizing: border-box;}
+        
+        .hold-demo { 
+            width: 60px; height: 60px; border: 3px solid var(--accent); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Existing Styles */
         .start-container {
             padding: 40px; text-align: center;
             display: flex; flex-direction: column; align-items: center; gap: 20px;
@@ -207,6 +261,7 @@
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
             #username-input { width: 240px; font-size: 20px; }
             .score-box { font-size: 1.5rem; padding: 10px 25px; }
+            .tut-title { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -253,6 +308,39 @@
             <div class="score-box" id="scoreBox">0</div>
             <div style="width: 55px;"></div> 
         </div>
+    </div>
+
+    <div id="tutorial-layer" class="ui-layer hidden">
+        
+        <div id="tutorial-prompt">
+            <div class="big-logo" style="width:80px; height:80px; font-size:3rem; margin-bottom:30px;">?</div>
+            <div style="font-size: 2rem; font-weight: 800; margin-bottom: 10px; text-align: center; padding: 0 20px;">First time playing?</div>
+            <div style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9;">Would you like a quick tutorial?</div>
+            <div style="display: flex; gap: 20px;">
+                <button class="btn btn-white" style="color:var(--text-color); width: 140px; padding: 20px 0;" onclick="skipTutorial()">NO</button>
+                <button class="btn btn-white" style="width: 140px; padding: 20px 0;" onclick="startTutorial()">YES</button>
+            </div>
+        </div>
+
+        <div id="tutorial-slides" class="hidden">
+            <div class="tut-card">
+                <div class="tut-img-box" id="tut-visual">
+                    </div>
+                <div class="tut-title" id="tut-title">Title</div>
+                <div class="tut-desc" id="tut-desc">Description goes here.</div>
+                
+                <div class="tut-nav">
+                    <button class="nav-btn" id="tut-prev" onclick="moveSlide(-1)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <div style="display:flex; align-items:center; gap:5px;" id="tut-dots"></div>
+                    <button class="nav-btn" id="tut-next" onclick="moveSlide(1)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -505,6 +593,113 @@
             if(window.gameInstance) window.gameInstance.requestAbandon();
         };
 
+        // --- TUTORIAL LOGIC ---
+        const TUTORIAL_DATA = [
+            {
+                title: "Basics",
+                desc: "Drag shapes from the dock onto the grid.",
+                html: `<div class="mini-grid">
+                        <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                        <div class="mini-cell"></div><div class="mini-cell c-ghost"></div><div class="mini-cell c-ghost"></div><div class="mini-cell"></div>
+                        <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                       </div>
+                       <div style="margin-top:10px; display:flex; gap:2px;">
+                        <div class="mini-cell c-red"></div><div class="mini-cell c-red"></div>
+                       </div>`
+            },
+            {
+                title: "Clearing Lines",
+                desc: "Fill a full row or column to clear it. <br><b>Wait! There's a twist...</b>",
+                html: `<div class="mini-grid">
+                        <div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div>
+                        <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                        <div class="mini-cell c-red"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                       </div>`
+            },
+            {
+                title: "Color Match",
+                desc: "Only lines containing <b>4 or more</b> blocks of the same color will pop!",
+                html: `<div class="mini-grid">
+                        <div class="mini-cell c-red"></div><div class="mini-cell c-red"></div><div class="mini-cell c-red"></div><div class="mini-cell c-red"></div>
+                        <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                       </div>
+                       <div style="color:var(--accent); font-weight:bold; margin-top:5px;">POW!</div>`
+            },
+            {
+                title: "Chain Reaction",
+                desc: "When blocks pop, any touching blocks of the same color also pop!",
+                html: `<div class="mini-grid">
+                        <div class="mini-cell c-red"></div><div class="mini-cell c-red"></div><div class="mini-cell c-red"></div><div class="mini-cell c-red"></div>
+                        <div class="mini-cell"></div><div class="mini-cell c-red"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                        <div class="mini-cell"></div><div class="mini-cell c-red"></div><div class="mini-cell c-red"></div><div class="mini-cell"></div>
+                       </div>`
+            },
+            {
+                title: "Hold Zone",
+                desc: "Drag a piece to the <b>HOLD</b> box to save it for later.",
+                html: `<div class="hold-demo"><div class="mini-cell c-blue"></div></div>`
+            },
+            {
+                title: "Multipliers",
+                desc: "Clear multiple lines at once to get massive score multipliers.",
+                html: `<div style="font-size:2rem; font-weight:900; color:#f1c40f;">MEGA!</div>`
+            }
+        ];
+
+        let curSlide = 0;
+
+        window.startTutorial = () => {
+            document.getElementById('tutorial-prompt').classList.add('hidden');
+            document.getElementById('tutorial-slides').classList.remove('hidden');
+            curSlide = 0;
+            renderSlide();
+        };
+
+        window.skipTutorial = () => {
+            finishTutorialLogic();
+        };
+
+        window.moveSlide = (dir) => {
+            curSlide += dir;
+            if(curSlide < 0) curSlide = 0;
+            if(curSlide >= TUTORIAL_DATA.length) {
+                finishTutorialLogic();
+            } else {
+                renderSlide();
+            }
+        };
+
+        function renderSlide() {
+            const data = TUTORIAL_DATA[curSlide];
+            document.getElementById('tut-visual').innerHTML = data.html;
+            document.getElementById('tut-title').innerText = data.title;
+            document.getElementById('tut-desc').innerHTML = data.desc;
+            
+            // Buttons
+            const nextBtn = document.getElementById('tut-next');
+            const prevBtn = document.getElementById('tut-prev');
+            
+            prevBtn.style.opacity = curSlide === 0 ? 0.3 : 1;
+            prevBtn.style.pointerEvents = curSlide === 0 ? 'none' : 'auto';
+
+            if(curSlide === TUTORIAL_DATA.length - 1) {
+                nextBtn.innerHTML = "PLAY";
+                nextBtn.classList.add('finish');
+            } else {
+                nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+                nextBtn.classList.remove('finish');
+            }
+        }
+
+        function finishTutorialLogic() {
+            localStorage.setItem('tutorialSeen', 'true');
+            document.getElementById('tutorial-layer').classList.add('hidden');
+            document.getElementById('tutorial-layer').classList.remove('active-layer');
+            window.gameInstance.startGame();
+        }
+
+        // --- END TUTORIAL LOGIC ---
+
         const GRID_SIZE = 9; 
         const MIN_MATCH = 4; 
         const COLORS = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd', '#ff9ff3', '#48dbfb'];
@@ -531,7 +726,8 @@
                     gameOver: document.getElementById('death-screen'),
                     scoreBox: document.getElementById('scoreBox'),
                     finalScore: document.getElementById('finalScore'),
-                    abandon: document.getElementById('abandon-modal')
+                    abandon: document.getElementById('abandon-modal'),
+                    tutorial: document.getElementById('tutorial-layer')
                 };
 
                 this.grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(null));
@@ -566,7 +762,15 @@
 
                 document.getElementById('startBtn').addEventListener('click', () => {
                     AudioSys.init(); 
-                    this.startGame();
+                    // Check Tutorial
+                    if(!localStorage.getItem('tutorialSeen')) {
+                        this.ui.menu.classList.add('hidden');
+                        this.ui.menu.classList.remove('active-layer');
+                        this.ui.tutorial.classList.remove('hidden');
+                        this.ui.tutorial.classList.add('active-layer');
+                    } else {
+                        this.startGame();
+                    }
                 });
                 document.getElementById('retryBtn').addEventListener('click', () => this.restart());
 
