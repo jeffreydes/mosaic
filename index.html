@@ -56,8 +56,8 @@
         #death-screen { background: var(--accent); z-index: 250; }
         #abandon-modal { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 400; }
         
-        /* TUTORIAL LAYER & PROMPT */
-        #tutorial-layer { z-index: 350; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+        /* TUTORIAL LAYER */
+        #tutorial-layer { z-index: 350; background: rgba(47, 53, 66, 0.8); backdrop-filter: blur(8px); }
 
         #tutorial-prompt {
             background: var(--accent);
@@ -75,105 +75,105 @@
             overflow-y: auto; overflow-x: hidden; box-sizing: border-box; background: white;
         }
 
-        /* TUTORIAL CARD STYLES */
-        .tut-card {
-            background: white; width: 90%; max-width: 380px;
-            border-radius: 30px; padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center; pointer-events: auto;
-            color: var(--text-color);
-        }
-
-        .tut-img-box {
-            width: 100%; aspect-ratio: 1; background: transparent; 
-            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+        /* TINDER CARD STACK STYLES */
+        #card-stack {
             position: relative;
+            width: 340px;
+            height: 550px;
+            max-width: 90vw;
+            max-height: 80vh;
+            pointer-events: none; /* Inner cards allow pointer events */
         }
 
-        .tut-title { font-size: 1.8rem; font-weight: 900; color: var(--accent); margin-bottom: 5px; }
-        .tut-desc { 
-            font-size: 1.1rem; 
-            color: #555; 
-            margin-bottom: 20px; 
-            font-weight: 500; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            max-width: 100%;
+        .t-card {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            box-sizing: border-box;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; align-items: center;
+            transform-origin: 50% 100%;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
+            pointer-events: auto;
+            overflow: hidden;
         }
 
-        .tut-nav {
-            display: flex; justify-content: space-between; width: 100%; margin-top: 10px;
+        /* Stack ordering */
+        .t-card:nth-child(1) { z-index: 10; } /* Top card */
+        .t-card:nth-child(2) { z-index: 9; transform: scale(0.95) translateY(10px); opacity: 0.8; pointer-events: none; }
+        .t-card:nth-child(3) { z-index: 8; transform: scale(0.90) translateY(20px); opacity: 0.5; pointer-events: none; }
+        
+        .t-card.swiping { transition: none; } /* Remove transition during drag */
+
+        /* Card Content */
+        .tut-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; font-weight: 800; color: #ccc; font-size: 0.9rem; text-transform: uppercase;
+        }
+        .progress-dots { display: flex; gap: 4px; }
+        .p-dot { width: 6px; height: 6px; border-radius: 50%; background: #eee; }
+        .p-dot.active { background: var(--accent); }
+
+        .tut-visual-container {
+            width: 100%; aspect-ratio: 1; background: var(--bg-color);
+            border-radius: 16px; margin-bottom: 25px;
+            position: relative; overflow: hidden;
+            border: 4px solid var(--grid-bg);
         }
 
-        .nav-btn {
-            width: 50px; height: 50px; border-radius: 50%; border: none;
-            background: #f1f2f6; color: var(--text-color);
-            font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .nav-btn:active { transform: scale(0.9); }
-        .nav-btn.finish { background: var(--accent); color: white; width: auto; padding: 0 25px; border-radius: 30px; font-weight: 800; font-size: 1rem;}
+        .tut-text-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .tut-h1 { font-size: 1.8rem; font-weight: 900; color: var(--text-color); margin: 0 0 10px 0; }
+        .tut-p { font-size: 1.1rem; line-height: 1.4; color: #777; margin: 0; font-weight: 500; }
 
-        /* CSS 9x9 Grid for Tutorial */
-        .mini-grid { 
+        .tut-hint {
+            margin-top: auto; padding-top: 15px;
+            color: #bbb; font-weight: 700; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 10px;
+            opacity: 0.6; animation: bob 2s infinite ease-in-out;
+        }
+        @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+        /* MOCK UI GRID */
+        .mock-grid { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
             grid-template-rows: repeat(9, 1fr); 
             gap: 2px; 
-            width: 100%;
-            height: 100%;
-            background: #f0f2f5;
-            padding: 5px;
-            border-radius: 10px;
-            box-sizing: border-box;
-            position: relative;
+            width: 100%; height: 100%;
+            padding: 8px; box-sizing: border-box;
         }
-        .mini-cell { 
-            background: #dfe4ea; 
-            border-radius: 2px; 
-            width: 100%; 
-            height: 100%;
-            transition: transform 0.2s, opacity 0.2s;
+        .m-cell { 
+            background: #dfe4ea; border-radius: 3px; width: 100%; height: 100%; 
+            transition: background-color 0.2s, transform 0.2s;
         }
         
-        /* Cell Colors */
+        /* Colors matching game */
         .c-red { background: #ff6b6b; }
         .c-blue { background: #54a0ff; }
         .c-green { background: #1dd1a1; }
         .c-yellow { background: #feca57; }
         .c-purple { background: #5f27cd; }
-        
-        .c-ghost { 
-            background: rgba(0,0,0,0.05); 
-            border: 1px dashed #bbb; 
-            box-sizing: border-box;
-        }
+        .c-ghost { background: rgba(0,0,0,0.05); border: 1px dashed #bbb; }
 
-        /* Animations */
-        .pop-anim { animation: popOut 0.3s forwards; }
+        /* Animation Helpers */
+        .pop-anim { animation: popOut 0.3s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popOut { 0% { transform: scale(1); opacity:1; } 100% { transform: scale(0); opacity:0; } }
 
-        .pulse-text { animation: pulseBig 1s infinite alternate; }
-        @keyframes pulseBig { from { transform: scale(1); } to { transform: scale(1.1); } }
-        
-        .hold-demo { 
-            width: 80px; height: 80px; border: 4px solid var(--accent); border-radius: 16px;
-            display: flex; align-items: center; justify-content: center; position: relative;
-        }
-        .hold-piece {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 40px; height: 40px;
-            transition: all 0.5s;
+        .hand-cursor {
+            width: 40px; height: 40px; position: absolute; z-index: 50;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18.5 12.15c.97 1.13 1.5 2.58 1.5 4.1 0 3.17-2.69 5.75-6 5.75-2.65 0-4.9-1.66-5.69-4.04l-2.81-8.43a2.5 2.5 0 0 1 4.74-1.58l.4 1.2 1.2-3.6a2.5 2.5 0 1 1 4.74 1.58l-1.5 4.5c1.17-.43 2.45-.63 3.42 1.02z'/%3E%3C/svg%3E") no-repeat center/contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: all 0.5s ease-out; pointer-events: none;
         }
 
-        /* Draggable Shape for Tutorial */
+        /* Interactive Basics Slide */
         #tut-drag-shape {
-            position: absolute; 
-            width: 66px; height: 66px; /* Approx size relative to grid */
+            position: absolute; width: 60px; height: 60px;
             display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
-            z-index: 100; cursor: grab;
-            touch-action: none;
+            z-index: 100; cursor: grab; touch-action: none;
         }
         #tut-drag-shape:active { cursor: grabbing; transform: scale(1.1); }
         .tut-block { background: #ff6b6b; border-radius: 4px; width: 100%; height: 100%; }
@@ -322,8 +322,6 @@
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
             #username-input { width: 240px; font-size: 20px; }
             .score-box { font-size: 1.5rem; padding: 10px 25px; }
-            .tut-title { font-size: 1.5rem; }
-            .tut-card { padding: 20px; width: 95%; }
         }
     </style>
 </head>
@@ -384,23 +382,8 @@
             </div>
         </div>
 
-        <div id="tutorial-slides" class="hidden" style="width:100%; display:flex; justify-content:center;">
-            <div class="tut-card">
-                <div class="tut-img-box" id="tut-visual">
-                    </div>
-                <div class="tut-title" id="tut-title">Title</div>
-                <div class="tut-desc" id="tut-desc">Description goes here.</div>
-                
-                <div class="tut-nav">
-                    <button class="nav-btn" id="tut-prev" onclick="moveSlide(-1)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <button class="nav-btn" id="tut-next" onclick="moveSlide(1)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                </div>
+        <div id="card-stack" class="hidden">
             </div>
-        </div>
 
     </div>
 
@@ -654,20 +637,18 @@
             if(window.gameInstance) window.gameInstance.requestAbandon();
         };
 
-        // --- TUTORIAL LOGIC ---
+        // --- TUTORIAL LOGIC WITH TINDER SWIPE ---
         let tutInterval = null;
+        let cardStackIndex = 0;
 
-        // Helper to generate 9x9 grid HTML from a pattern array
-        function createGridHTML(pattern = [], draggable = false) {
-            let html = '<div class="mini-grid" id="mini-grid">';
+        function createGridHTML(pattern = [], draggable = false, idSuffix='') {
+            let html = `<div class="mock-grid" id="mgrid-${idSuffix}">`;
             for(let y=0; y<9; y++) {
                 for(let x=0; x<9; x++) {
-                    let className = 'mini-cell';
-                    let idStr = `c-${x}-${y}`;
-                    // Check if x,y is in pattern
+                    let className = 'm-cell';
+                    let idStr = `c-${x}-${y}-${idSuffix}`;
                     const p = pattern.find(p => p.x === x && p.y === y);
                     if(p) className += ' ' + p.cls;
-                    
                     html += `<div class="${className}" id="${idStr}"></div>`;
                 }
             }
@@ -687,24 +668,20 @@
                 html: createGridHTML([
                     {x:3, y:3, cls:'c-ghost'}, {x:4, y:3, cls:'c-ghost'},
                     {x:3, y:4, cls:'c-ghost'}, {x:4, y:4, cls:'c-ghost'}
-                ], true),
+                ], true, 'basics'),
                 setup: () => {
                     const drag = document.getElementById('tut-drag-shape');
-                    const grid = document.getElementById('mini-grid');
-                    const nextBtn = document.getElementById('tut-next');
-                    nextBtn.style.opacity = 0.3; 
-                    nextBtn.style.pointerEvents = 'none';
-
-                    // Center the drag shape initially
-                    drag.style.top = '70%'; 
-                    drag.style.left = '40%';
+                    const grid = document.getElementById('mgrid-basics');
+                    const hint = document.querySelector('#card-0 .tut-hint');
+                    
+                    drag.style.top = '70%'; drag.style.left = '40%';
 
                     let isDown = false;
-                    let startX, startY;
-                    let initLeft, initTop;
+                    let startX, startY, initLeft, initTop;
 
                     const start = (e) => {
-                        e.stopPropagation(); // Stop bubbling
+                        // Prevent swipe on card if touching block
+                        e.stopPropagation(); 
                         const evt = e.touches ? e.touches[0] : e;
                         isDown = true;
                         startX = evt.clientX;
@@ -716,8 +693,7 @@
 
                     const move = (e) => {
                         if(!isDown) return;
-                        e.stopPropagation();
-                        e.preventDefault();
+                        e.stopPropagation(); e.preventDefault();
                         const evt = e.touches ? e.touches[0] : e;
                         const dx = evt.clientX - startX;
                         const dy = evt.clientY - startY;
@@ -729,7 +705,7 @@
                         if(!isDown) return;
                         isDown = false;
                         drag.style.cursor = 'grab';
-                        // Check distance to center of grid (approx)
+                        // Check drop
                         const gridRect = grid.getBoundingClientRect();
                         const dragRect = drag.getBoundingClientRect();
                         const gCx = gridRect.left + gridRect.width/2;
@@ -737,24 +713,15 @@
                         const dCx = dragRect.left + dragRect.width/2;
                         const dCy = dragRect.top + dragRect.height/2;
                         
-                        const dist = Math.hypot(gCx - dCx, gCy - dCy);
-                        
-                        if(dist < 50) {
-                            // Success
+                        if(Math.hypot(gCx - dCx, gCy - dCy) < 50) {
                             AudioSys.play('snap');
                             drag.style.display = 'none';
                             // Fill Grid
-                            document.getElementById('c-3-3').classList.add('c-red');
-                            document.getElementById('c-4-3').classList.add('c-red');
-                            document.getElementById('c-3-4').classList.add('c-red');
-                            document.getElementById('c-4-4').classList.add('c-red');
-                            document.getElementById('tut-desc').innerText = "Great! You got it.";
-                            nextBtn.style.opacity = 1;
-                            nextBtn.style.pointerEvents = 'auto';
+                            ['c-3-3-basics','c-4-3-basics','c-3-4-basics','c-4-4-basics'].forEach(id => document.getElementById(id).classList.add('c-red'));
+                            hint.innerHTML = "Swipe card to continue &rarr;";
+                            hint.style.color = "var(--accent)";
                         } else {
-                            // Return
-                            drag.style.left = '40%';
-                            drag.style.top = '70%';
+                            drag.style.left = '40%'; drag.style.top = '70%';
                         }
                     };
 
@@ -765,7 +732,6 @@
                     window.addEventListener('mouseup', end);
                     window.addEventListener('touchend', end);
 
-                    // Cleanup listener helper
                     this.dragCleanup = () => {
                         window.removeEventListener('mousemove', move);
                         window.removeEventListener('touchmove', move);
@@ -773,36 +739,37 @@
                         window.removeEventListener('touchend', end);
                     }
                 },
-                teardown: () => {
-                    if(this.dragCleanup) this.dragCleanup();
-                }
+                teardown: () => { if(this.dragCleanup) this.dragCleanup(); }
             },
             {
                 title: "Clearing Lines",
-                desc: "Fill a full row or column to clear it.",
+                desc: "Fill a full row to clear it.",
                 html: createGridHTML([
-                    {x:0, y:4, cls:'c-blue'}, {x:1, y:4, cls:'c-blue'}, {x:2, y:4, cls:'c-blue'},
-                    {x:3, y:4, cls:'c-green'}, {x:4, y:4, cls:'c-green'}, {x:5, y:4, cls:'c-green'},
+                    {x:0, y:4, cls:'c-blue'}, {x:1, y:4, cls:'c-blue'}, {x:2, y:4, cls:'c-blue'}, {x:3, y:4, cls:'c-blue'},
+                    {x:4, y:4, cls:'c-green'}, {x:5, y:4, cls:'c-green'},
                     {x:6, y:4, cls:'c-yellow'}, {x:7, y:4, cls:'c-yellow'}
-                ]),
+                ], false, 'clear') + `<div id="hand-clear" class="hand-cursor" style="top:100%; left:85%;"></div>`,
                 setup: () => {
-                    // Animation: Add last block -> Flash -> Clear -> Reset
+                    const hand = document.getElementById('hand-clear');
                     const cycle = () => {
+                        // Reset
+                        for(let x=0; x<9; x++) {
+                            let el = document.getElementById(`c-${x}-4-clear`);
+                            el.classList.remove('pop-anim');
+                            if(x===8) el.classList.remove('c-yellow');
+                        }
+                        hand.style.top = '100%'; hand.style.opacity = '1';
+
                         setTimeout(() => {
-                            document.getElementById('c-8-4').classList.add('c-yellow'); // Place block
-                        }, 500);
+                            hand.style.top = '45%'; // Move hand up
+                        }, 100);
                         setTimeout(() => {
-                            // Flash whole row
-                            for(let x=0; x<9; x++) document.getElementById(`c-${x}-4`).classList.add('pop-anim');
+                            document.getElementById('c-8-4-clear').classList.add('c-yellow'); // Place
+                            hand.style.opacity = '0';
+                        }, 600);
+                        setTimeout(() => {
+                            for(let x=0; x<9; x++) document.getElementById(`c-${x}-4-clear`).classList.add('pop-anim');
                         }, 1200);
-                        setTimeout(() => {
-                            // Reset
-                            for(let x=0; x<9; x++) {
-                                let el = document.getElementById(`c-${x}-4`);
-                                el.classList.remove('pop-anim');
-                                if(x===8) el.classList.remove('c-yellow');
-                            }
-                        }, 2200);
                     };
                     cycle();
                     tutInterval = setInterval(cycle, 2500);
@@ -813,26 +780,30 @@
                 title: "Color Match",
                 desc: "Only lines containing 4 or more blocks of the same color will pop!",
                 html: createGridHTML([
-                    {x:0, y:4, cls:'c-red'}, {x:1, y:4, cls:'c-red'}, {x:2, y:4, cls:'c-red'},
+                    {x:0, y:4, cls:'c-red'}, {x:1, y:4, cls:'c-red'}, {x:2, y:4, cls:'c-red'}, 
                     {x:4, y:4, cls:'c-blue'}, {x:5, y:4, cls:'c-blue'}, {x:6, y:4, cls:'c-blue'},
                     {x:7, y:4, cls:'c-yellow'}, {x:8, y:4, cls:'c-yellow'}
-                ]),
+                ], false, 'match') + `<div id="hand-match" class="hand-cursor" style="top:100%; left:35%;"></div>`,
                 setup: () => {
+                    const hand = document.getElementById('hand-match');
                     const cycle = () => {
+                        // Reset
+                        for(let x=0; x<9; x++) {
+                            let el = document.getElementById(`c-${x}-4-match`);
+                            el.classList.remove('pop-anim');
+                            if(x===3) el.classList.remove('c-red');
+                        }
+                        hand.style.top = '100%'; hand.style.opacity = '1';
+
+                        setTimeout(() => { hand.style.top = '45%'; }, 100);
                         setTimeout(() => {
-                            document.getElementById('c-3-4').classList.add('c-red'); // Complete line
-                        }, 500);
+                            document.getElementById('c-3-4-match').classList.add('c-red');
+                            hand.style.opacity = '0';
+                        }, 600);
                         setTimeout(() => {
-                            // Pop only red
-                            for(let x=0; x<4; x++) document.getElementById(`c-${x}-4`).classList.add('pop-anim');
+                            // Only reds pop
+                            for(let x=0; x<4; x++) document.getElementById(`c-${x}-4-match`).classList.add('pop-anim');
                         }, 1200);
-                        setTimeout(() => {
-                            for(let x=0; x<4; x++) {
-                                let el = document.getElementById(`c-${x}-4`);
-                                el.classList.remove('pop-anim');
-                                if(x===3) el.classList.remove('c-red');
-                            }
-                        }, 2200);
                     };
                     cycle();
                     tutInterval = setInterval(cycle, 2500);
@@ -841,156 +812,176 @@
             },
             {
                 title: "Chain Reaction",
-                desc: "When blocks pop, any touching blocks of the same color also pop!",
+                desc: "Popped blocks trigger neighbors of the same color!",
                 html: createGridHTML([
-                    // Center Cluster
                     {x:4, y:3, cls:'c-red'}, {x:4, y:5, cls:'c-red'},
                     {x:3, y:4, cls:'c-red'}, {x:5, y:4, cls:'c-red'},
-                    // Connected Arms
-                    {x:3, y:3, cls:'c-red'}, {x:2, y:2, cls:'c-red'},
-                    {x:5, y:5, cls:'c-red'}, {x:6, y:6, cls:'c-red'},
-                    // Noise (other colors)
-                    {x:0, y:0, cls:'c-blue'}, {x:1, y:0, cls:'c-blue'}, {x:8, y:8, cls:'c-green'},
-                    {x:2, y:4, cls:'c-yellow'}, {x:6, y:4, cls:'c-purple'}
-                ]),
+                    {x:3, y:3, cls:'c-red'}, {x:5, y:5, cls:'c-red'},
+                    {x:0, y:0, cls:'c-blue'}
+                ], false, 'chain') + `<div id="hand-chain" class="hand-cursor" style="top:100%; left:45%;"></div>`,
                 setup: () => {
+                    const hand = document.getElementById('hand-chain');
                     const cycle = () => {
+                        // Reset
+                        document.querySelectorAll('#mgrid-chain .m-cell').forEach(el => el.classList.remove('pop-anim'));
+                        document.getElementById('c-4-4-chain').classList.remove('c-red');
+                        hand.style.top = '100%'; hand.style.opacity = '1';
+
+                        setTimeout(() => { hand.style.top = '45%'; }, 100);
                         setTimeout(() => {
-                            document.getElementById('c-4-4').classList.add('c-red'); // Place center
-                        }, 500);
-                        
+                            document.getElementById('c-4-4-chain').classList.add('c-red');
+                            hand.style.opacity = '0';
+                        }, 600);
                         setTimeout(() => {
-                            // Pop Center
-                            document.getElementById('c-4-4').classList.add('pop-anim');
-                            document.getElementById('c-4-3').classList.add('pop-anim');
-                            document.getElementById('c-4-5').classList.add('pop-anim');
-                            document.getElementById('c-3-4').classList.add('pop-anim');
-                            document.getElementById('c-5-4').classList.add('pop-anim');
+                            ['c-4-4-chain','c-4-3-chain','c-4-5-chain','c-3-4-chain','c-5-4-chain'].forEach(id=>document.getElementById(id).classList.add('pop-anim'));
                         }, 1000);
-
                         setTimeout(() => {
-                            // Pop Outer
-                            document.getElementById('c-3-3').classList.add('pop-anim');
-                            document.getElementById('c-5-5').classList.add('pop-anim');
+                            ['c-3-3-chain','c-5-5-chain'].forEach(id=>document.getElementById(id).classList.add('pop-anim'));
                         }, 1200);
-
-                        setTimeout(() => {
-                            // Pop Far Outer
-                            document.getElementById('c-2-2').classList.add('pop-anim');
-                            document.getElementById('c-6-6').classList.add('pop-anim');
-                        }, 1400);
-
-                        setTimeout(() => {
-                            // Reset
-                            const all = document.querySelectorAll('.mini-cell');
-                            all.forEach(el => el.classList.remove('pop-anim'));
-                            document.getElementById('c-4-4').classList.remove('c-red');
-                        }, 2500);
                     };
                     cycle();
                     tutInterval = setInterval(cycle, 2800);
                 },
                 teardown: () => clearInterval(tutInterval)
-            },
-            {
-                title: "Hold Zone",
-                desc: "Drag a piece to the HOLD box to save it for later.",
-                html: `<div class="hold-demo"><div class="hold-piece" id="anim-hold-piece"><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div><div class="mini-cell c-blue"></div></div></div>`,
-                setup: () => {
-                    const p = document.getElementById('anim-hold-piece');
-                    const cycle = () => {
-                        p.style.transform = 'translate(0, 100px) scale(1.2)';
-                        p.style.opacity = '0';
-                        setTimeout(() => {
-                            p.style.opacity = '1';
-                            p.style.transform = 'translate(0, 0) scale(1)';
-                        }, 500);
-                    };
-                    cycle();
-                    tutInterval = setInterval(cycle, 2000);
-                },
-                teardown: () => clearInterval(tutInterval)
-            },
-            {
-                title: "Multipliers",
-                desc: "Clear multiple lines at once to get massive score multipliers.",
-                html: `<div class="pulse-text" id="mult-text" style="font-size:3rem; font-weight:900; color:#f1c40f; text-shadow: 0 5px 15px rgba(0,0,0,0.1);">MEGA!</div>`,
-                setup: () => {
-                    const txt = document.getElementById('mult-text');
-                    const words = ["DOUBLE!", "TRIPLE!", "MEGA!"];
-                    const colors = ["#ffa502", "#ff6348", "#2ed573"];
-                    let idx = 0;
-                    tutInterval = setInterval(() => {
-                        idx = (idx + 1) % 3;
-                        txt.innerText = words[idx];
-                        txt.style.color = colors[idx];
-                    }, 1000);
-                },
-                teardown: () => clearInterval(tutInterval)
             }
         ];
 
-        let curSlide = 0;
-
         window.startTutorial = () => {
             document.getElementById('tutorial-prompt').classList.add('hidden');
-            document.getElementById('tutorial-slides').classList.remove('hidden');
-            curSlide = 0;
-            renderSlide();
+            const stack = document.getElementById('card-stack');
+            stack.classList.remove('hidden');
+            initCards();
         };
 
-        window.skipTutorial = () => {
-            finishTutorialLogic();
-        };
+        window.skipTutorial = () => { finishTutorialLogic(); };
 
-        window.moveSlide = (dir) => {
-            // cleanup previous
-            if(TUTORIAL_DATA[curSlide].teardown) TUTORIAL_DATA[curSlide].teardown();
-
-            curSlide += dir;
-            if(curSlide < 0) curSlide = 0;
-            if(curSlide >= TUTORIAL_DATA.length) {
-                finishTutorialLogic();
-            } else {
-                renderSlide();
-            }
-        };
-
-        function renderSlide() {
-            const data = TUTORIAL_DATA[curSlide];
-            document.getElementById('tut-visual').innerHTML = data.html;
-            document.getElementById('tut-title').innerText = data.title;
-            document.getElementById('tut-desc').innerText = data.desc;
-            
-            // Setup Animation logic
-            if(data.setup) data.setup();
-
-            // Buttons
-            const nextBtn = document.getElementById('tut-next');
-            const prevBtn = document.getElementById('tut-prev');
-            
-            prevBtn.style.opacity = curSlide === 0 ? 0.3 : 1;
-            prevBtn.style.pointerEvents = curSlide === 0 ? 'none' : 'auto';
-
-            if(curSlide === TUTORIAL_DATA.length - 1) {
-                nextBtn.innerHTML = "PLAY";
-                nextBtn.classList.add('finish');
-                nextBtn.style.opacity = 1;
-                nextBtn.style.pointerEvents = 'auto';
-            } else {
-                nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
-                nextBtn.classList.remove('finish');
-                // If it's the first slide (Drag demo), we handle button state in the setup()
-                if(curSlide !== 0) {
-                    nextBtn.style.opacity = 1;
-                    nextBtn.style.pointerEvents = 'auto';
+        function initCards() {
+            const stack = document.getElementById('card-stack');
+            stack.innerHTML = "";
+            TUTORIAL_DATA.forEach((data, i) => {
+                const card = document.createElement('div');
+                card.className = 't-card';
+                card.id = `card-${i}`;
+                
+                // Progress Dots
+                let dotsHtml = "";
+                for(let d=0; d<TUTORIAL_DATA.length; d++) {
+                    dotsHtml += `<div class="p-dot ${d===i ? 'active' : ''}"></div>`;
                 }
+
+                card.innerHTML = `
+                    <div class="tut-header">
+                        <span>STEP ${i+1}</span>
+                        <div class="progress-dots">${dotsHtml}</div>
+                    </div>
+                    <div class="tut-visual-container">${data.html}</div>
+                    <div class="tut-text-area">
+                        <h1 class="tut-h1">${data.title}</h1>
+                        <p class="tut-p">${data.desc}</p>
+                        <div class="tut-hint">
+                            Swipe to continue &rarr;
+                        </div>
+                    </div>
+                `;
+                stack.appendChild(card);
+            });
+
+            // Start first card logic
+            cardStackIndex = 0;
+            if(TUTORIAL_DATA[0].setup) TUTORIAL_DATA[0].setup();
+            setupSwipeEvents();
+        }
+
+        function setupSwipeEvents() {
+            const cards = document.querySelectorAll('.t-card');
+            
+            cards.forEach((card, index) => {
+                if(index !== 0) return; // Only attach to top card initially implies re-attaching, but let's do all and check index
+                
+                let startX = 0;
+                let isDragging = false;
+
+                const onStart = (e) => {
+                    // Only allow top card
+                    if(index !== cardStackIndex) return;
+                    isDragging = true;
+                    startX = e.touches ? e.touches[0].clientX : e.clientX;
+                    card.classList.add('swiping');
+                };
+
+                const onMove = (e) => {
+                    if(!isDragging) return;
+                    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const dx = currentX - startX;
+                    const rot = dx * 0.05;
+                    card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+                };
+
+                const onEnd = (e) => {
+                    if(!isDragging) return;
+                    isDragging = false;
+                    card.classList.remove('swiping');
+                    
+                    // Get current TransformX roughly
+                    // Easier: check distance from touch start
+                    const currentX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+                    const dx = currentX - startX;
+
+                    if(Math.abs(dx) > 100) {
+                        // Swipe Out
+                        const dir = dx > 0 ? 1 : -1;
+                        card.style.transform = `translateX(${dir * 500}px) rotate(${dir * 30}deg)`;
+                        card.style.opacity = '0';
+                        nextCard();
+                    } else {
+                        // Snap Back
+                        card.style.transform = `translateX(0) rotate(0)`;
+                    }
+                };
+
+                card.addEventListener('mousedown', onStart);
+                card.addEventListener('touchstart', onStart, {passive:true});
+                
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, {passive:false});
+                
+                window.addEventListener('mouseup', onEnd);
+                window.addEventListener('touchend', onEnd);
+            });
+        }
+
+        function nextCard() {
+            // Teardown current
+            if(TUTORIAL_DATA[cardStackIndex].teardown) TUTORIAL_DATA[cardStackIndex].teardown();
+            
+            cardStackIndex++;
+            
+            if(cardStackIndex >= TUTORIAL_DATA.length) {
+                setTimeout(finishTutorialLogic, 300);
+            } else {
+                // Setup next
+                if(TUTORIAL_DATA[cardStackIndex].setup) TUTORIAL_DATA[cardStackIndex].setup();
+                
+                // Animate Stack Up
+                const cards = document.querySelectorAll('.t-card');
+                cards.forEach((c, i) => {
+                    if(i === cardStackIndex) {
+                        c.style.transform = 'scale(1) translateY(0)';
+                        c.style.opacity = '1';
+                        c.style.pointerEvents = 'auto';
+                    } else if (i === cardStackIndex + 1) {
+                        c.style.transform = 'scale(0.95) translateY(10px)';
+                        c.style.opacity = '0.8';
+                    }
+                });
             }
         }
 
         function finishTutorialLogic() {
-            if(TUTORIAL_DATA[curSlide] && TUTORIAL_DATA[curSlide].teardown) TUTORIAL_DATA[curSlide].teardown();
             localStorage.setItem('tutorialSeen', 'true');
+            // Check if user skipped or finished naturally
+            if(TUTORIAL_DATA[cardStackIndex] && TUTORIAL_DATA[cardStackIndex].teardown) TUTORIAL_DATA[cardStackIndex].teardown();
+            
             document.getElementById('tutorial-layer').classList.add('hidden');
             document.getElementById('tutorial-layer').classList.remove('active-layer');
             window.gameInstance.startGame();
@@ -1061,6 +1052,7 @@
                 document.getElementById('startBtn').addEventListener('click', () => {
                     AudioSys.init(); 
                     // Check Tutorial
+                    // Force check logic:
                     if(!localStorage.getItem('tutorialSeen')) {
                         this.ui.menu.classList.add('hidden');
                         this.ui.menu.classList.remove('active-layer');
@@ -1168,7 +1160,7 @@
                     this.dragPiece.isDragging = true;
                     this.dragOffset.x = -(this.dragPiece.w / 2);
                     this.dragOffset.y = -(this.dragPiece.h / 2);
-                    if (e.touches) this.dragOffset.y -= 30; // FIX: Reduced from 80 to 30 for better control
+                    if (e.touches) this.dragOffset.y -= 30; 
                     
                     this.holdPiece = null;
                     AudioSys.play('pop');
@@ -1202,7 +1194,7 @@
                     this.dragOffset.y = -(bestPiece.h / 2);
                     
                     if (e.touches) {
-                        this.dragOffset.y -= 30; // FIX: Reduced from 80/100 to 30 for better control
+                        this.dragOffset.y -= 30; 
                     }
                     AudioSys.play('pop');
                 }
