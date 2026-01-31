@@ -56,6 +56,11 @@
 
         .splash-logo-row {
             display: flex; gap: 12px;
+            max-width: 95vw;
+            justify-content: center;
+            flex-wrap: wrap; /* Safety wrap for tiny screens */
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .splash-block {
@@ -116,7 +121,7 @@
         /* TUTORIAL LAYER */
         #tutorial-layer { 
             z-index: 350; 
-            background: red; 
+            background: var(--accent); /* Uses the game's specific red */
             backdrop-filter: blur(8px); 
         }
 
@@ -383,6 +388,17 @@
             .big-logo { width: 80px; height: 80px; font-size: 3.5rem; }
             #username-input { width: 240px; font-size: 20px; }
             .score-box { font-size: 1.5rem; padding: 10px 25px; }
+            
+            /* --- UPDATED: Splash Screen Sizing for Mobile --- */
+            .splash-block { 
+                width: 40px; 
+                height: 40px; 
+                font-size: 1.5rem; 
+                border-radius: 10px; 
+            }
+            .splash-logo-row { 
+                gap: 6px; 
+            }
         }
     </style>
 </head>
@@ -2030,6 +2046,3 @@
     </script>
 </body>
 </html>
-
-
-
