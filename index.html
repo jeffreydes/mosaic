@@ -446,6 +446,20 @@
                 });
                 if (isIOS) btn.style.display = 'flex';
             }
+
+            // --- CHECK SAVED USERNAME ---
+            const savedName = localStorage.getItem('mosaicUsername');
+            if (savedName) {
+                myName = savedName;
+                document.getElementById('username-input').value = savedName;
+                // Skip start screen if user exists
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('active-layer');
+                document.getElementById('main-menu').classList.remove('hidden');
+                document.getElementById('main-menu').classList.add('active-layer');
+            }
+
+            window.gameInstance = new Game();
         });
 
         window.triggerInstall = () => {
@@ -476,7 +490,11 @@
             AudioSys.init(); 
             const input = document.getElementById('username-input');
             const val = input.value.trim();
-            if (val) myName = val;
+            if (val) {
+                myName = val;
+                // Save username for next time
+                localStorage.setItem('mosaicUsername', val);
+            }
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('active-layer');
             document.getElementById('main-menu').classList.remove('hidden');
@@ -648,7 +666,7 @@
                     this.dragPiece.isDragging = true;
                     this.dragOffset.x = -(this.dragPiece.w / 2);
                     this.dragOffset.y = -(this.dragPiece.h / 2);
-                    if (e.touches) this.dragOffset.y -= 80;
+                    if (e.touches) this.dragOffset.y -= 30; // FIX: Reduced from 80 to 30 for better control
                     
                     this.holdPiece = null;
                     AudioSys.play('pop');
@@ -682,7 +700,7 @@
                     this.dragOffset.y = -(bestPiece.h / 2);
                     
                     if (e.touches) {
-                        this.dragOffset.y -= 100; 
+                        this.dragOffset.y -= 30; // FIX: Reduced from 80/100 to 30 for better control
                     }
                     AudioSys.play('pop');
                 }
