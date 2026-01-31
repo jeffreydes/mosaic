@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
 
+    <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
     <style>
         :root {
             --bg-color: #f0f2f5; 
@@ -654,13 +655,22 @@
         let deferredPrompt;
         window.addEventListener('load', () => {
 
-            // --- SPLASH SCREEN LOGIC ---
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.classList.add('slide-out');
-                // Remove from DOM for performance after anim
-                setTimeout(() => splash.style.display = 'none', 800);
-            }, 1000);
+            // --- POKI SDK INITIALIZATION ---
+            PokiSDK.init().then(() => {
+                console.log("Poki SDK initialized successfully");
+            }).catch(() => {
+                console.log("Adblock enabled");
+            }).finally(() => {
+                PokiSDK.gameLoadingFinished(); // Tell Poki we are ready
+                
+                // --- EXISTING SPLASH LOGIC MOVED HERE ---
+                setTimeout(() => {
+                    const splash = document.getElementById('splash-screen');
+                    splash.classList.add('slide-out');
+                    setTimeout(() => splash.style.display = 'none', 800);
+                }, 1000);
+            });
+            // -------------------------------
 
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const btn = document.getElementById('homeBtn');
@@ -1156,10 +1166,18 @@
                         this.ui.tutorial.classList.remove('hidden');
                         this.ui.tutorial.classList.add('active-layer');
                     } else {
+                        // --- POKI SDK: Gameplay Start ---
+                        PokiSDK.gameplayStart();
+                        // --------------------------------
                         this.startGame();
                     }
                 });
-                document.getElementById('retryBtn').addEventListener('click', () => this.restart());
+                document.getElementById('retryBtn').addEventListener('click', () => {
+                     // --- POKI SDK: Gameplay Start (Retry) ---
+                     PokiSDK.gameplayStart();
+                     // ----------------------------------------
+                    this.restart();
+                });
 
                 document.getElementById('btn-stay').addEventListener('click', () => {
                     this.isPaused = false;
@@ -1168,6 +1186,9 @@
                 });
 
                 document.getElementById('btn-leave').addEventListener('click', () => {
+                    // --- POKI SDK: Gameplay Stop (Abandon) ---
+                    PokiSDK.gameplayStop();
+                    // -----------------------------------------
                     this.isPaused = false;
                     this.ui.abandon.classList.add('hidden');
                     this.ui.abandon.classList.remove('active-layer');
@@ -1732,9 +1753,7 @@
                 }
                 
                 if (!canMove) {
-                    // CHANGED LOGIC HERE: 
                     // Only save the player if Hold is empty AND they have exactly 1 piece left.
-                    // This allows them to move that last piece to hold to trigger a respawn.
                     if (this.holdPiece === null && this.dockPieces.length === 1) {
                         return; 
                     }
@@ -1745,6 +1764,11 @@
 
             startDeathAnimation() {
                 this.isDying = true;
+                
+                // --- POKI SDK: Gameplay Stop ---
+                PokiSDK.gameplayStop();
+                // -------------------------------
+                
                 for (let y = 0; y < GRID_SIZE; y++) {
                     setTimeout(() => {
                         for (let x = 0; x < GRID_SIZE; x++) {
@@ -1757,10 +1781,16 @@
                     }, y * 100); 
                 }
                 setTimeout(() => {
-                    this.ui.finalScore.innerText = this.score;
-                    this.ui.gameOver.classList.remove('hidden');
-                    this.ui.gameOver.classList.add('active-layer');
-                    submitScore(myName, this.score);
+                    // --- POKI SDK: Commercial Break ---
+                    // We trigger the ad AFTER the animation, but BEFORE the menu shows up.
+                    PokiSDK.commercialBreak().then(() => {
+                        // Logic to resume after ad (or if ad blocked)
+                        this.ui.finalScore.innerText = this.score;
+                        this.ui.gameOver.classList.remove('hidden');
+                        this.ui.gameOver.classList.add('active-layer');
+                        submitScore(myName, this.score);
+                    });
+                    // ----------------------------------
                 }, GRID_SIZE * 100 + 800);
             }
 
@@ -2040,7 +2070,7 @@
         }
 
         window.addEventListener('load', () => {
-             window.gameInstance = new Game();
+             // Game instance creation is now handled inside PokiSDK.init() block
         });
 
     </script>
