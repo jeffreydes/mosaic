@@ -896,7 +896,7 @@
             const cards = document.querySelectorAll('.t-card');
             
             cards.forEach((card, index) => {
-                if(index !== 0) return; // Only attach to top card initially implies re-attaching, but let's do all and check index
+                // Attach to all, but logic checks index
                 
                 let startX = 0;
                 let isDragging = false;
